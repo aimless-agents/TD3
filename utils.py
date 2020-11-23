@@ -38,3 +38,41 @@ class ReplayBuffer(object):
 			torch.FloatTensor(self.reward[ind]).to(self.device),
 			torch.FloatTensor(self.not_done[ind]).to(self.device)
 		)
+
+class PrioritizedReplayBuffer(ReplayBuffer):
+	def __init__(self, state_dim, action_dim, max_timesteps, max_size=int(1e6)):
+		super().__init__(state_dim, action_dim, max_size)
+		self.priority = np.zeros(max_size)
+
+		self.max_timesteps = max_timesteps
+		self.alpha = 1.0		# TODO: maybe tune this
+		self.beta = 0.0
+
+
+	def add(self, state, action, next_state, reward, done):
+		self.priority[self.ptr] = max(np.max(self.priority), 1.0)
+
+		super().add(state, action, next_state, reward, done)
+
+	def sample(self, batch_size):
+		scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
+		# import pdb; pdb.set_trace()
+		self.prob = scaled_priorities / np.sum(scaled_priorities)
+		self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
+		self.compute_weights()
+		
+		return (
+			torch.FloatTensor(self.state[self.ind]).to(self.device),
+			torch.FloatTensor(self.action[self.ind]).to(self.device),
+			torch.FloatTensor(self.next_state[self.ind]).to(self.device),
+			torch.FloatTensor(self.reward[self.ind]).to(self.device),
+			torch.FloatTensor(self.not_done[self.ind]).to(self.device)
+		)
+
+	def update_priority(self, td_error):
+		self.priority[self.ind] = np.abs(td_error.detach().numpy())
+
+	def compute_weights(self):
+		weights = ((1.0 / self.size) * (1.0 / np.take(self.prob, self.ind))) 
+		self.weights = weights / np.max(weights)
+	

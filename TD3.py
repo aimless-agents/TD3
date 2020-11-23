@@ -100,6 +100,8 @@ class TD3(object):
 		state = torch.FloatTensor(state.reshape(1, -1)).to(device)
 		return self.actor(state).cpu().data.numpy().flatten()
 
+	def weighted_mse_loss(self, pred, target, weights):
+		return torch.sum((weights * (pred - target)) ** 2)
 
 	def train(self, replay_buffer, batch_size=100):
 		self.total_it += 1
@@ -127,6 +129,11 @@ class TD3(object):
 
 		# Compute critic loss
 		critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
+		
+		weights = torch.from_numpy(replay_buffer.weights)
+		critic_loss = self.weighted_mse_loss(current_Q1, target_Q, weights) + self.weighted_mse_loss(current_Q2, target_Q, weights)
+		# critic_loss = torch.sum((torch.from_numpy(replay_buffer.weights) * (current_Q1 - target_Q)) ** 2) + 
+		replay_buffer.update_priority(critic_loss)
 
 		# Optimize the critic
 		self.critic_optimizer.zero_grad()
@@ -136,7 +143,7 @@ class TD3(object):
 		# Delayed policy updates
 		if self.total_it % self.policy_freq == 0:
 
-			# Compute actor losse
+			# Compute actor losses
 			actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
 			
 			# Optimize the actor 
