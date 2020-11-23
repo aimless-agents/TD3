@@ -50,6 +50,8 @@ if __name__ == "__main__":
 	parser.add_argument("--policy_freq", default=2, type=int)       # Frequency of delayed policy updates
 	parser.add_argument("--save_model", action="store_true")        # Save model and optimizer parameters
 	parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
+
+	parser.add_argument("--prioritized_replay", default=True)		# Whether or not to use prioritized replay buffer
 	args = parser.parse_args()
 
 	file_name = f"{args.policy}_{args.env}_{args.seed}"
@@ -88,6 +90,7 @@ if __name__ == "__main__":
 		kwargs["policy_noise"] = args.policy_noise * max_action
 		kwargs["noise_clip"] = args.noise_clip * max_action
 		kwargs["policy_freq"] = args.policy_freq
+		kwargs["prioritized_replay"] = args.prioritized_replay
 		policy = TD3.TD3(**kwargs)
 	elif args.policy == "OurDDPG":
 		policy = OurDDPG.DDPG(**kwargs)
@@ -98,7 +101,10 @@ if __name__ == "__main__":
 		policy_file = file_name if args.load_model == "default" else args.load_model
 		policy.load(f"./models/{policy_file}")
 
-	replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim, args.max_timesteps)
+	if args.prioritized_replay:
+		replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim, args.max_timesteps)
+	else:
+		replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
 	
 	# Evaluate untrained policy
 	evaluations = [eval_policy(policy, args.env, args.seed)]

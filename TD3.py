@@ -71,6 +71,7 @@ class TD3(object):
 		state_dim,
 		action_dim,
 		max_action,
+		prioritized_replay,
 		discount=0.99,
 		tau=0.005,
 		policy_noise=0.2,
@@ -94,6 +95,8 @@ class TD3(object):
 		self.policy_freq = policy_freq
 
 		self.total_it = 0
+
+		self.prioritized_replay = prioritized_replay
 
 
 	def select_action(self, state):
@@ -128,12 +131,14 @@ class TD3(object):
 		current_Q1, current_Q2 = self.critic(state, action)
 
 		# Compute critic loss
-		critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
 		
 		weights = torch.from_numpy(replay_buffer.weights)
-		critic_loss = self.weighted_mse_loss(current_Q1, target_Q, weights) + self.weighted_mse_loss(current_Q2, target_Q, weights)
-		# critic_loss = torch.sum((torch.from_numpy(replay_buffer.weights) * (current_Q1 - target_Q)) ** 2) + 
-		replay_buffer.update_priority(critic_loss)
+
+		if self.prioritized_replay:
+			critic_loss = self.weighted_mse_loss(current_Q1, target_Q, weights) + self.weighted_mse_loss(current_Q2, target_Q, weights)
+			replay_buffer.update_priority(critic_loss)
+		else:
+			critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
 
 		# Optimize the critic
 		self.critic_optimizer.zero_grad()
