@@ -8,6 +8,5 @@ do
 	--policy "TD3" \
 	--env "Hopper-v3" \
     --save_model \
-	--seed $i \
-    # --start_timesteps 300
+	--seed $i
 done
