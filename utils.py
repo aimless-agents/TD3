@@ -46,6 +46,8 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         super().__init__(state_dim, action_dim, max_size)
         self.priority = np.zeros(max_size)
         self.adjustment = 0
+        self.start_timesteps = start_timesteps
+        self.max_timesteps = max_timesteps
         self.train_timesteps = max_timesteps - start_timesteps - self.adjustment
 
         self.alpha = float(alpha)
