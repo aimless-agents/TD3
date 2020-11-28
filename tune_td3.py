@@ -50,11 +50,16 @@ def train(
     policy,
     prioritized_replay,
     env_name,
-    eval_freq
+    eval_freq,
+    discount,
+    tau
 ):
-    beta_step = float(config["beta_step"])
-    discount = float(config["discount"])
-    tau = float(config["tau"])
+    if prioritized_replay:
+        alpha = float(config["alpha"])
+        beta = float(config["beta"])
+    else:
+        discount = float(config["discount"])
+        tau = float(config["tau"])
 
     env = gym.make(env_name)
 
@@ -89,7 +94,7 @@ def train(
         policy = DDPG.DDPG(**kwargs)
 
     if prioritized_replay:
-        replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim, max_timesteps, start_timesteps, beta_step)
+        replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim, max_timesteps, start_timesteps, alpha=alpha, beta=beta)
     else:
         replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
     
@@ -163,32 +168,46 @@ if __name__ == "__main__":
     parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
 
     parser.add_argument("--prioritized_replay", default=True)		# Whether or not to use prioritized replay buffer
+    parser.add_argument("--smoke_test", default=False)
     args = parser.parse_args()
 
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
-    config = {
-        "beta_step": tune.grid_search([1e-5, 1e-4, 1e-3]),
-        "discount": tune.grid_search([0.995, 0.998]),
-        "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
-    }
+    if args.prioritized_replay:
+        config = {
+            "beta": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
+            "alpha": tune.grid_search([0.4, 0.5, 0.6, 0.7])
+        }
+    else: 
+        config = {
+            "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
+            "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
+        }
 
     kwargs = {}
 
-    kwargs["start_timesteps"] = args.start_timesteps
-    kwargs["max_timesteps"] = args.max_timesteps
+    if not args.smoke_test:
+        kwargs["start_timesteps"] = args.start_timesteps
+        kwargs["max_timesteps"] = args.max_timesteps
+        kwargs["eval_freq"] = args.eval_freq
+    else:
+        kwargs["start_timesteps"] = 25
+        kwargs["max_timesteps"] = 75
+        kwargs["eval_freq"] = 5
+        
     kwargs["policy_noise"] = args.policy_noise
     kwargs["expl_noise"] = args.expl_noise
     kwargs["noise_clip"] = args.noise_clip
-    kwargs["policy_freq"] = args.policy_freq
     kwargs["batch_size"] = args.batch_size
+    kwargs["policy_freq"] = args.policy_freq
     kwargs["seed"] = args.seed
     kwargs["policy"] = args.policy
     kwargs["prioritized_replay"] = args.prioritized_replay
     kwargs["env_name"] = args.env
-    kwargs["eval_freq"] = args.eval_freq
+    kwargs["discount"] = args.discount
+    kwargs["tau"] = args.tau
 
     result = tune.run(
         tune.with_parameters(train, **kwargs),
