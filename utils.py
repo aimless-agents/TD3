@@ -40,13 +40,19 @@ class ReplayBuffer(object):
         )
 
 class PrioritizedReplayBuffer(ReplayBuffer):
-    def __init__(self, state_dim, action_dim, max_timesteps, start_timesteps, max_size=int(1e6)):
+    def __init__(self, state_dim, action_dim, max_timesteps, start_timesteps, beta_step=None, max_size=int(1e6)):
         super().__init__(state_dim, action_dim, max_size)
         self.priority = np.zeros(max_size)
         self.adjustment = 0
+        self.start_timesteps = start_timesteps
+        self.max_timesteps = max_timesteps
         self.train_timesteps = max_timesteps - start_timesteps - self.adjustment
         self.alpha = 1.0		# TODO: maybe tune this
         self.beta = 0.0
+        if beta_step != None:
+            self.beta_step = beta_step
+        else:
+            self.beta_step = 1.0 / self.train_timesteps
 
 
     def add(self, state, action, next_state, reward, done):
@@ -59,7 +65,8 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         self.prob = scaled_priorities / np.sum(scaled_priorities)
         self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
         self.weights = self.compute_weights()
-        self.beta = min(self.beta + (1.0 / self.train_timesteps), 1.0)
+        # self.beta = min(self.beta + (1.0 / self.train_timesteps), 1.0)
+        self.beta = min(self.beta + self.beta_step, 1.0)
         
         return (
             torch.FloatTensor(self.state[self.ind]).to(self.device),
