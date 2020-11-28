@@ -9,7 +9,7 @@ do
 	--env "Humanoid-v2" \
     --save_model \
 	--seed $i \
-	--alpha 0.5
-    # --prioritized_replay False
+	# --alpha 0.5 \
+    # --prioritized_replay False \
     --start_timesteps 300
 done

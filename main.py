@@ -18,19 +18,22 @@ def eval_policy(policy, env_name, seed, eval_episodes=10):
 
     rewards = np.zeros(eval_episodes)
     for i in range(eval_episodes):
+        returns = 0.0
         state, done = eval_env.reset(), False
         while not done:
             action = policy.select_action(np.array(state))
             state, reward, done, _ = eval_env.step(action)
-            rewards[i] = reward
+            returns += reward
 
-        avg_reward = np.mean(rewards)
-        std_reward = np.std(rewards)
+        rewards[i] = returns
 
-        print("---------------------------------------")
-        print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f}")
-        print("---------------------------------------")
-        return [avg_reward, std_reward]
+    avg_reward = np.mean(rewards)
+    std_reward = np.std(rewards)
+
+    print("---------------------------------------")
+    print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f}")
+    print("---------------------------------------")
+    return [avg_reward, std_reward]
 
 
 if __name__ == "__main__":
