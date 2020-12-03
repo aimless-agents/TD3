@@ -130,10 +130,8 @@ class TD3(object):
 		current_Q1, current_Q2 = self.critic(state, action)
 
 		# Compute critic loss
-		
-		weights = torch.from_numpy(replay_buffer.weights)
-
 		if self.prioritized_replay:
+			weights = torch.from_numpy(replay_buffer.weights)
 			critic_loss = self.weighted_mse_loss(current_Q1, target_Q, weights) + self.weighted_mse_loss(current_Q2, target_Q, weights)
 			replay_buffer.update_priority(critic_loss)
 		else:
