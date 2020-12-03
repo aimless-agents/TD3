@@ -175,7 +175,7 @@ if __name__ == "__main__":
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
-    if args.prioritized_replay:
+    if str(args.prioritized_replay) == "True":
         config = {
             "beta": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
             "alpha": tune.grid_search([0.4, 0.5, 0.6, 0.7])
