@@ -148,6 +148,8 @@ def train(
             evaluations.append(avg_reward)
 
 if __name__ == "__main__":
+
+    ray.init(address='auto', _redis_password='5241590000000000')
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--policy", default="TD3")                  # Policy name (TD3, DDPG or OurDDPG)
