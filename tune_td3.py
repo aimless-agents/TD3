@@ -149,7 +149,7 @@ def train(
 
 if __name__ == "__main__":
 
-    ray.init(address='auto', _redis_password='5241590000000000')
+    # ray.init(address='auto', _redis_password='5241590000000000')
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--policy", default="TD3")                  # Policy name (TD3, DDPG or OurDDPG)
@@ -169,15 +169,16 @@ if __name__ == "__main__":
     parser.add_argument("--save_model", action="store_true")        # Save model and optimizer parameters
     parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
 
-    parser.add_argument("--prioritized_replay", default=True)		# Whether or not to use prioritized replay buffer
-    parser.add_argument("--smoke_test", default=False)
+    parser.add_argument("--prioritized_replay", action="store_true")		# include to use prioritized replay buffer
+    parser.add_argument("--smoke_test", action="store_true")                # include to use with smoke test
+    # parser.add_argument("--prioritized_replay", default=True)		# Whether or not to use prioritized replay buffer
+    # parser.add_argument("--smoke_test", default=False)
     args = parser.parse_args()
-
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
-    if str(args.prioritized_replay) == "True":
+    if args.prioritized_replay:
         config = {
             "beta": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
             "alpha": tune.grid_search([0.4, 0.5, 0.6, 0.7])
