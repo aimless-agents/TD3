@@ -1,0 +1,2 @@
+episode_reward_mean,time_this_iter_s,done,timesteps_total,episodes_total,training_iteration,experiment_id,date,timestamp,time_total_s,pid,hostname,node_ip,time_since_restore,timesteps_since_restore,iterations_since_restore,trial_id,experiment_tag
+10.302632077325839,18.40101718902588,True,,,1,454ab5afe2ad4f679264b6f0d4757244,2020-12-09_00-49-52,1607503792,18.40101718902588,14701,Macbook,192.168.86.30,18.40101718902588,0,1,19358_00014,"14_discount=0.999,tau=0.0001"

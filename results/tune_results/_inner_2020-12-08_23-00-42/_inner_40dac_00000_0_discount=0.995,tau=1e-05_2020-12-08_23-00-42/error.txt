@@ -1,0 +1,46 @@
+Failure # 1 (occurred at 2020-12-08_23-00-45)
+Traceback (most recent call last):
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/trial_runner.py", line 726, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/ray_trial_executor.py", line 489, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/worker.py", line 1452, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(TuneError): [36mray::ImplicitFunc.train()[39m (pid=4013, ip=192.168.86.30)
+  File "python/ray/_raylet.pyx", line 482, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 436, in ray._raylet.execute_task.function_executor
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/trainable.py", line 336, in train
+    result = self.step()
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 366, in step
+    self._report_thread_runner_error(block=True)
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 513, in _report_thread_runner_error
+    .format(err_tb_str)))
+ray.tune.error.TuneError: Trial raised an exception. Traceback:
+[36mray::ImplicitFunc.train()[39m (pid=4013, ip=192.168.86.30)
+  File "/Users/admin/.local/lib/python3.6/site-packages/gym/envs/registration.py", line 121, in spec
+    return self.env_specs[id]
+KeyError: 'AntMuJoCotEnv-v0'
+
+During handling of the above exception, another exception occurred:
+
+[36mray::ImplicitFunc.train()[39m (pid=4013, ip=192.168.86.30)
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 248, in run
+    self._entrypoint()
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 316, in entrypoint
+    self._status_reporter.get_checkpoint())
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 575, in _trainable_func
+    output = fn()
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 649, in _inner
+    inner(config, checkpoint_dir=None)
+  File "/Users/admin/anaconda3/envs/newpy36/lib/python3.6/site-packages/ray/tune/function_runner.py", line 643, in inner
+    fn(config, **fn_kwargs)
+  File "tune_td3.py", line 65, in train
+    env = gym.make(env_name)
+  File "/Users/admin/.local/lib/python3.6/site-packages/gym/envs/registration.py", line 145, in make
+    return registry.make(id, **kwargs)
+  File "/Users/admin/.local/lib/python3.6/site-packages/gym/envs/registration.py", line 89, in make
+    spec = self.spec(path)
+  File "/Users/admin/.local/lib/python3.6/site-packages/gym/envs/registration.py", line 131, in spec
+    raise error.UnregisteredEnv('No registered env with id: {}'.format(id))
+gym.error.UnregisteredEnv: No registered env with id: AntMuJoCotEnv-v0
+

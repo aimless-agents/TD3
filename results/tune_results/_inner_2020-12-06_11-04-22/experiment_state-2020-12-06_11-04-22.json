@@ -1,0 +1,1056 @@
+{
+  "checkpoints": [
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00000",
+      "config": {
+        "beta": 0.3,
+        "alpha": 0.4
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.4,
+        "beta": 0.3
+      },
+      "experiment_tag": "0_alpha=0.4,beta=0.3",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {
+        "episode_reward_mean": 7.882843972963495,
+        "time_this_iter_s": 24.438594818115234,
+        "done": false,
+        "timesteps_total": null,
+        "episodes_total": null,
+        "training_iteration": 5,
+        "experiment_id": "7d0ca9390e0a42aa99057084bb0681dd",
+        "date": "2020-12-06_11-06-28",
+        "timestamp": 1607281588,
+        "time_total_s": 123.1952497959137,
+        "pid": 23539,
+        "hostname": "Macbook",
+        "node_ip": "192.168.86.30",
+        "config": {
+          "beta": 0.3,
+          "alpha": 0.4
+        },
+        "time_since_restore": 123.1952497959137,
+        "timesteps_since_restore": 0,
+        "iterations_since_restore": 5,
+        "trial_id": "d9da7_00000",
+        "experiment_tag": "0_alpha=0.4,beta=0.3"
+      },
+      "last_update_time": 1607281588.971971,
+      "metric_analysis": {
+        "episode_reward_mean": {
+          "max": 7.882843972963495,
+          "min": 7.882843972963495,
+          "avg": 7.882843972963496,
+          "last": 7.882843972963495,
+          "last-5-avg": 7.882843972963495,
+          "last-10-avg": 7.882843972963495
+        },
+        "time_this_iter_s": {
+          "max": 28.17236590385437,
+          "min": 21.34071397781372,
+          "avg": 24.639049959182742,
+          "last": 24.438594818115234,
+          "last-5-avg": 24.63904995918274,
+          "last-10-avg": 24.63904995918274
+        },
+        "done": {
+          "max": false,
+          "min": false,
+          "avg": 0.0,
+          "last": false,
+          "last-5-avg": 0.0,
+          "last-10-avg": 0.0
+        },
+        "training_iteration": {
+          "max": 5,
+          "min": 1,
+          "avg": 3.0,
+          "last": 5,
+          "last-5-avg": 3.0,
+          "last-10-avg": 3.0
+        },
+        "timestamp": {
+          "max": 1607281588,
+          "min": 1607281487,
+          "avg": 1607281538.4,
+          "last": 1607281588,
+          "last-5-avg": 1607281538.4,
+          "last-10-avg": 1607281538.4
+        },
+        "time_total_s": {
+          "max": 123.1952497959137,
+          "min": 21.34071397781372,
+          "avg": 73.13743090629578,
+          "last": 123.1952497959137,
+          "last-5-avg": 73.13743090629578,
+          "last-10-avg": 73.13743090629578
+        },
+        "pid": {
+          "max": 23539,
+          "min": 23539,
+          "avg": 23539.0,
+          "last": 23539,
+          "last-5-avg": 23539.0,
+          "last-10-avg": 23539.0
+        },
+        "time_since_restore": {
+          "max": 123.1952497959137,
+          "min": 21.34071397781372,
+          "avg": 73.13743090629578,
+          "last": 123.1952497959137,
+          "last-5-avg": 73.13743090629578,
+          "last-10-avg": 73.13743090629578
+        },
+        "timesteps_since_restore": {
+          "max": 0,
+          "min": 0,
+          "avg": 0.0,
+          "last": 0,
+          "last-5-avg": 0.0,
+          "last-10-avg": 0.0
+        },
+        "iterations_since_restore": {
+          "max": 5,
+          "min": 1,
+          "avg": 3.0,
+          "last": 5,
+          "last-5-avg": 3.0,
+          "last-10-avg": 3.0
+        },
+        "config/beta": {
+          "max": 0.3,
+          "min": 0.3,
+          "avg": 0.3,
+          "last": 0.3,
+          "last-5-avg": 0.3,
+          "last-10-avg": 0.3
+        },
+        "config/alpha": {
+          "max": 0.4,
+          "min": 0.4,
+          "avg": 0.4,
+          "last": 0.4,
+          "last-5-avg": 0.4,
+          "last-10-avg": 0.4
+        }
+      },
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {
+        "episode_reward_mean": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "800495d8000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294288c156e756d70792e636f72652e6d756c74696172726179948c067363616c61729493948c056e756d7079948c0564747970659493948c026638944b004b0187945294284b038c013c944e4e4e4affffffff4affffffff4b0074946243084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f409486945294652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "800495d8000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294288c156e756d70792e636f72652e6d756c74696172726179948c067363616c61729493948c056e756d7079948c0564747970659493948c026638944b004b0187945294284b038c013c944e4e4e4affffffff4affffffff4b0074946243084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f4094869452946807680d43084b651d4008881f409486945294652e"
+          }
+        },
+        "time_this_iter_s": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b05869452942847403557390800000047403c2c202c0000004740375e4de4000000474039e00d0c0000004740387047c0000000652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a869452942847403557390800000047403c2c202c0000004740375e4de4000000474039e00d0c0000004740387047c0000000652e"
+          }
+        },
+        "done": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "80049527000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294288989898989652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "80049527000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294288989898989652e"
+          }
+        },
+        "training_iteration": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294284b014b024b034b044b05652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294284b014b024b034b044b05652e"
+          }
+        },
+        "timestamp": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004953b000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294284a4f2bcd5f4a6b2bcd5f4a822bcd5f4a9c2bcd5f4ab42bcd5f652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004953b000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294284a4f2bcd5f4a6b2bcd5f4a822bcd5f4a9c2bcd5f4ab42bcd5f652e"
+          }
+        },
+        "time_total_s": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b058694529428474035573908000000474048c1ac9a0000004740523869c6000000474058b06d0900000047405ecc7ef9000000652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a8694529428474035573908000000474048c1ac9a0000004740523869c6000000474058b06d0900000047405ecc7ef9000000652e"
+          }
+        },
+        "pid": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "80049531000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294284df35b4df35b4df35b4df35b4df35b652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "80049531000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294284df35b4df35b4df35b4df35b4df35b652e"
+          }
+        },
+        "time_since_restore": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b058694529428474035573908000000474048c1ac9a0000004740523869c6000000474058b06d0900000047405ecc7ef9000000652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a8694529428474035573908000000474048c1ac9a0000004740523869c6000000474058b06d0900000047405ecc7ef9000000652e"
+          }
+        },
+        "timesteps_since_restore": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294284b004b004b004b004b00652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294284b004b004b004b004b00652e"
+          }
+        },
+        "iterations_since_restore": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0586945294284b014b024b034b044b05652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004952c000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a86945294284b014b024b034b044b05652e"
+          }
+        },
+        "config/beta": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b058694529428473fd3333333333333473fd3333333333333473fd3333333333333473fd3333333333333473fd3333333333333652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a8694529428473fd3333333333333473fd3333333333333473fd3333333333333473fd3333333333333473fd3333333333333652e"
+          }
+        },
+        "config/alpha": {
+          "5": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b058694529428473fd999999999999a473fd999999999999a473fd999999999999a473fd999999999999a473fd999999999999a652e"
+          },
+          "10": {
+            "_type": "CLOUDPICKLE_FALLBACK",
+            "value": "8004954f000000000000008c0b636f6c6c656374696f6e73948c056465717565949394294b0a8694529428473fd999999999999a473fd999999999999a473fd999999999999a473fd999999999999a473fd999999999999a652e"
+          }
+        }
+      },
+      "export_formats": [],
+      "status": "ERROR",
+      "start_time": 1607281462.8074958,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00000_0_alpha=0.4,beta=0.3_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 1607281588.971949,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00001",
+      "config": {
+        "beta": 0.3,
+        "alpha": 0.5
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.5,
+        "beta": 0.3
+      },
+      "experiment_tag": "1_alpha=0.5,beta=0.3",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00001_1_alpha=0.5,beta=0.3_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00002",
+      "config": {
+        "beta": 0.3,
+        "alpha": 0.6
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.6,
+        "beta": 0.3
+      },
+      "experiment_tag": "2_alpha=0.6,beta=0.3",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00002_2_alpha=0.6,beta=0.3_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00003",
+      "config": {
+        "beta": 0.3,
+        "alpha": 0.7
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.7,
+        "beta": 0.3
+      },
+      "experiment_tag": "3_alpha=0.7,beta=0.3",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00003_3_alpha=0.7,beta=0.3_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00004",
+      "config": {
+        "beta": 0.4,
+        "alpha": 0.4
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.4,
+        "beta": 0.4
+      },
+      "experiment_tag": "4_alpha=0.4,beta=0.4",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00004_4_alpha=0.4,beta=0.4_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00005",
+      "config": {
+        "beta": 0.4,
+        "alpha": 0.5
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.5,
+        "beta": 0.4
+      },
+      "experiment_tag": "5_alpha=0.5,beta=0.4",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00005_5_alpha=0.5,beta=0.4_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00006",
+      "config": {
+        "beta": 0.4,
+        "alpha": 0.6
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.6,
+        "beta": 0.4
+      },
+      "experiment_tag": "6_alpha=0.6,beta=0.4",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00006_6_alpha=0.6,beta=0.4_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00007",
+      "config": {
+        "beta": 0.4,
+        "alpha": 0.7
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.7,
+        "beta": 0.4
+      },
+      "experiment_tag": "7_alpha=0.7,beta=0.4",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/_inner_d9da7_00007_7_alpha=0.7,beta=0.4_2020-12-06_11-04-22",
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": true
+    },
+    {
+      "trainable_name": "_inner",
+      "trial_id": "d9da7_00008",
+      "config": {
+        "beta": 0.5,
+        "alpha": 0.4
+      },
+      "local_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+      "evaluated_params": {
+        "alpha": 0.4,
+        "beta": 0.5
+      },
+      "experiment_tag": "8_alpha=0.4,beta=0.5",
+      "location": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "8004953a000000000000008c0e7261792e74756e652e747269616c948c084c6f636174696f6e9493942981947d94288c08686f73746e616d65944e8c03706964944e75622e"
+      },
+      "resources": {
+        "cpu": 1,
+        "gpu": 0,
+        "memory": 0,
+        "object_store_memory": 0,
+        "extra_cpu": 0,
+        "extra_gpu": 0,
+        "extra_memory": 0,
+        "extra_object_store_memory": 0,
+        "custom_resources": {},
+        "extra_custom_resources": {}
+      },
+      "stopping_criterion": {},
+      "loggers": "80044e2e",
+      "log_to_file": [
+        null,
+        null
+      ],
+      "sync_to_driver_fn": "80044e2e",
+      "verbose": true,
+      "max_failures": 0,
+      "last_result": {},
+      "last_update_time": -Infinity,
+      "metric_analysis": {},
+      "n_steps": [
+        5,
+        10
+      ],
+      "metric_n_steps": {},
+      "export_formats": [],
+      "status": "PENDING",
+      "start_time": null,
+      "logdir": null,
+      "runner": null,
+      "result_logger": null,
+      "last_debug": 0,
+      "error_file": null,
+      "error_msg": null,
+      "trial_name_creator": null,
+      "custom_trial_name": null,
+      "custom_dirname": null,
+      "saving_to": null,
+      "remote_checkpoint_dir_prefix": null,
+      "checkpoint_freq": 0,
+      "checkpoint_at_end": false,
+      "keep_checkpoints_num": null,
+      "checkpoint_score_attr": "training_iteration",
+      "sync_on_checkpoint": true,
+      "checkpoint_manager": {
+        "_type": "CLOUDPICKLE_FALLBACK",
+        "value": "80049566010000000000008c1b7261792e74756e652e636865636b706f696e745f6d616e61676572948c11436865636b706f696e744d616e616765729493942981947d94288c146b6565705f636865636b706f696e74735f6e756d94477ff00000000000008c165f636865636b706f696e745f73636f72655f6465736394898c165f636865636b706f696e745f73636f72655f61747472948c12747261696e696e675f697465726174696f6e948c1c6e65776573745f70657273697374656e745f636865636b706f696e749468008c0a436865636b706f696e749493942981947d94288c0773746f72616765948c0a70657273697374656e74948c0576616c7565944e8c06726573756c74947d9475628c195f6e65776573745f6d656d6f72795f636865636b706f696e7494680b2981947d9428680e8c066d656d6f72799468104e68117d9475628c115f626573745f636865636b706f696e7473945d948c0b5f6d656d62657273686970948f9475622e"
+      },
+      "restore_path": null,
+      "restoring_from": null,
+      "num_failures": 0,
+      "results": "80044e2e",
+      "best_result": "80044e2e",
+      "param_config": "80044e2e",
+      "extra_arg": "80044e2e",
+      "_nonjson_fields": [
+        "loggers",
+        "sync_to_driver_fn",
+        "results",
+        "best_result",
+        "param_config",
+        "extra_arg"
+      ],
+      "resuming_from": null,
+      "__logger_started__": false
+    }
+  ],
+  "runner_data": {
+    "_metric": null,
+    "_total_time": 990.6721956729889,
+    "_iteration": 48,
+    "_has_errored": true,
+    "_fail_fast": false,
+    "_verbose": true,
+    "_server_port": null,
+    "_cached_trial_decisions": {},
+    "_should_stop_experiment": false,
+    "_local_checkpoint_dir": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22",
+    "_remote_checkpoint_dir": null,
+    "_stopper": {
+      "_type": "CLOUDPICKLE_FALLBACK",
+      "value": "80049527000000000000008c107261792e74756e652e73746f70706572948c0b4e6f6f7053746f707065729493942981942e"
+    },
+    "_resumed": false,
+    "_start_time": 1607281462.65952,
+    "_last_checkpoint_time": 1607281615.547201,
+    "_checkpoint_period": 10,
+    "_session_str": "2020-12-06_11-04-22",
+    "checkpoint_file": "/Users/admin/703/project/TD3/results/tune_results/_inner_2020-12-06_11-04-22/experiment_state-2020-12-06_11-04-22.json",
+    "launch_web_server": false
+  },
+  "stats": {
+    "start_time": 1607281462.65952,
+    "timestamp": 1607281615.547201
+  }
+}

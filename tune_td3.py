@@ -176,7 +176,6 @@ if __name__ == "__main__":
     parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
     parser.add_argument("--smoke_test", default=False, action='store_true')             # Include this flag to run a smoke test
     args = parser.parse_args()
-
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
     print("---------------------------------------")
