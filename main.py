@@ -9,6 +9,8 @@ import TD3
 import OurDDPG
 import DDPG
 
+import pybulletgym
+
 
 # Runs policy for X episodes and returns reward average and std
 # A fixed seed is used for the eval environment
