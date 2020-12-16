@@ -59,7 +59,6 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         super().add(state, action, next_state, reward, done)
 
     def sample(self, batch_size):
-        # import pdb; pdb.set_trace()
         scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
         self.prob = scaled_priorities / np.sum(scaled_priorities)
         self.ind = np.random.choice(
