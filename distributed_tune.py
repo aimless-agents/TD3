@@ -4,11 +4,13 @@ import gym
 import argparse
 import os
 import sys
+import pybulletgym
 
 import utils
 import TD3
 import OurDDPG
 import DDPG
+import warnings
 
 import ray 
 from ray import tune
@@ -19,6 +21,8 @@ from ray.tune.schedulers import ASHAScheduler
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10):
+    import pybulletgym
+    warnings.filterwarnings("ignore")
     eval_env = gym.make(env_name)
     eval_env.seed(seed + 100)
 
@@ -60,7 +64,9 @@ def train(
     else:
         discount = float(config["discount"])
         tau = float(config["tau"])
-
+    
+    import pybulletgym
+    warnings.filterwarnings("ignore")
     env = gym.make(env_name)
 
     # Set seeds
@@ -152,7 +158,7 @@ if __name__ == "__main__":
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.environ["PYTHONPATH"] = parent_dir + ":" + os.environ.get("PYTHONPATH", "")
     ray.init(address='auto', _redis_password='5241590000000000')
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--policy", default="TD3")                  # Policy name (TD3, DDPG or OurDDPG)
     parser.add_argument("--env", default="HalfCheetah-v2")          # OpenAI gym environment name
@@ -162,8 +168,8 @@ if __name__ == "__main__":
     parser.add_argument("--max_timesteps", default=75e4, type=int)   # Max time steps to run environment
     parser.add_argument("--expl_noise", default=0.1)                # Std of Gaussian exploration noise
     parser.add_argument("--batch_size", default=256, type=int)      # Batch size for both actor and critic
-    parser.add_argument("--discount", default=0.99)                 # Discount factor
-    parser.add_argument("--tau", default=0.005)                     # Target network update rate
+    parser.add_argument("--discount", default=0.99, type=float)     # Discount factor
+    parser.add_argument("--tau", default=0.005, type=float)         # Target network update rate
     parser.add_argument("--beta_step", default=0.008)               # Beta annealing step-size (should be 1/max_timesteps)
     parser.add_argument("--policy_noise", default=0.2)              # Noise added to target policy during critic update
     parser.add_argument("--noise_clip", default=0.5)                # Range to clip target policy noise
@@ -171,10 +177,9 @@ if __name__ == "__main__":
     parser.add_argument("--save_model", action="store_true")        # Save model and optimizer parameters
     parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
 
-    parser.add_argument("--prioritized_replay", default=True, action='store_false')		# Include this flag to use prioritized replay buffer
-    parser.add_argument("--smoke_test", default=True, action='store_false')             # Include this flag to run a smoke test
+    parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
+    parser.add_argument("--smoke_test", default=False, action='store_true')             # Include this flag to run a smoke test
     args = parser.parse_args()
-
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
     print("---------------------------------------")
