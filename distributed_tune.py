@@ -4,9 +4,11 @@ import gym
 import argparse
 import os
 import sys
-import pybulletgym
 
-
+import utils
+import TD3
+import OurDDPG
+import DDPG
 import warnings
 
 import ray 
@@ -91,10 +93,6 @@ def train(
         kwargs["policy_freq"] = policy_freq
         kwargs["prioritized_replay"] = prioritized_replay
         policy = TD3.TD3(**kwargs)
-    elif policy == "OurDDPG":
-        policy = OurDDPG.DDPG(**kwargs)
-    elif policy == "DDPG":
-        policy = DDPG.DDPG(**kwargs)
 
     if prioritized_replay:
         replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim, max_timesteps, start_timesteps, alpha=alpha, beta=beta)
@@ -154,11 +152,6 @@ if __name__ == "__main__":
 
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.environ["PYTHONPATH"] = parent_dir + ":" + os.environ.get("PYTHONPATH", "")
-
-    import utils
-    import TD3
-    import OurDDPG
-    import DDPG
 
     ray.init(address='auto', _redis_password='5241590000000000')
 
