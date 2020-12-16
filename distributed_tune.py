@@ -6,10 +6,7 @@ import os
 import sys
 import pybulletgym
 
-import utils
-import TD3
-import OurDDPG
-import DDPG
+
 import warnings
 
 import ray 
@@ -157,6 +154,12 @@ if __name__ == "__main__":
 
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.environ["PYTHONPATH"] = parent_dir + ":" + os.environ.get("PYTHONPATH", "")
+
+    import utils
+    import TD3
+    import OurDDPG
+    import DDPG
+
     ray.init(address='auto', _redis_password='5241590000000000')
 
     parser = argparse.ArgumentParser()
