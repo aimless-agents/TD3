@@ -182,8 +182,8 @@ if __name__ == "__main__":
 
     if args.prioritized_replay:
         config = {
-            "beta": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
-            "alpha": tune.grid_search([0.4, 0.5, 0.6, 0.7])
+            "beta": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.4, 0.5]),
+            "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6])
         }
     else: 
         config = {
