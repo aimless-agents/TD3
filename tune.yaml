@@ -1,20 +1,24 @@
 cluster_name: tune-default
 provider: {type: aws, region: us-west-2}
 auth: {ssh_user: ubuntu}
-min_workers: 3
-max_workers: 3
+min_workers: 2
+max_workers: 2
 # Deep Learning AMI (Ubuntu) Version 38.0
 head_node: 
-    InstanceType: t2.micro
-    ImageId: ami-091b192bc8632b830
+    InstanceType: c3.large
+    ImageId: ami-098555c9b343eb09c
     InstanceMarketOptions:
         MarketType: spot
+        SpotOptions:
+            MaxPrice: '0.0322'
 
 worker_nodes: 
-    InstanceType: t2.micro
-    ImageId: ami-091b192bc8632b830
+    InstanceType: c3.large
+    ImageId: ami-098555c9b343eb09c
     InstanceMarketOptions:
         MarketType: spot
+        SpotOptions:
+            MaxPrice: '0.0322'
 
 setup_commands: # Set up each node.
     - pip install ray torch torchvision tabulate tensorboard gym

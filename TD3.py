@@ -75,7 +75,8 @@ class TD3(object):
 		tau=0.005,
 		policy_noise=0.2,
 		noise_clip=0.5,
-		policy_freq=2
+		policy_freq=2,
+		use_rank=False
 	):
 
 		self.actor = Actor(state_dim, action_dim, max_action).to(device)
@@ -96,6 +97,7 @@ class TD3(object):
 		self.total_it = 0
 
 		self.prioritized_replay = prioritized_replay
+		self.use_rank = use_rank
 
 
 	def select_action(self, state):
@@ -109,7 +111,7 @@ class TD3(object):
 		self.total_it += 1
 
 		# Sample replay buffer 
-		state, action, next_state, reward, not_done = replay_buffer.sample(batch_size)
+		state, action, next_state, reward, not_done = replay_buffer.sample(batch_size, self.use_rank)
 
 		with torch.no_grad():
 			# Select action according to policy and add clipped noise

@@ -58,9 +58,26 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         super().add(state, action, next_state, reward, done)
 
-    def sample(self, batch_size):
-        scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
-        self.prob = scaled_priorities / np.sum(scaled_priorities)
+    def rank_probs(self):
+        problist = list(enumerate(self.priority[:self.size]))
+        problist.sort(key=lambda priority : priority[1])
+        ranklist = [(len(problist) - i, i) for i, _ in problist]
+        batched_ranklist = [(1/np.ceil((rank/len(ranklist)) * 256), i) for rank, i in ranklist]
+        new_list = [0] * len(batched_ranklist)
+        for score, idx in batched_ranklist:
+            new_list[idx] = score
+
+        import pdb; pdb.set_trace()
+        return new_list / sum(new_list)
+
+
+    def sample(self, batch_size, use_rank=False):
+        if use_rank:
+            self.prob = self.rank_probs()
+
+        else:
+            scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
+            self.prob = scaled_priorities / np.sum(scaled_priorities)
         self.ind = np.random.choice(
             self.size, p=self.prob, size=batch_size, replace=True)
         self.weights = self.compute_weights()
@@ -82,3 +99,16 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         weights = ((1.0 / self.size) * (1.0 / np.take(self.prob, self.ind)))
         beta_weights = np.power(weights, self.beta)
         return beta_weights / np.max(beta_weights)
+
+class HindsightReplayBuffer(PrioritizedReplayBuffer):   # extend regular RB?
+    def __init__(self, state_dim, action_dim, max_timesteps,
+                 start_timesteps, max_size=int(1e6),
+                 alpha=1.0, beta=0.0):
+        super().__init__(state_dim, action_dim, max_size, 
+            alpha=alpha, beta=beta)
+    
+    def add(self, state, action, next_state, reward, done):
+        pass
+
+    def sample(self, batch_size):
+        pass
