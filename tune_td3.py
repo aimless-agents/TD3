@@ -56,7 +56,8 @@ def train(
     env_name,
     eval_freq,
     discount,
-    tau
+    tau,
+    use_rank
 ):
     if prioritized_replay:
         alpha = float(config["alpha"])
@@ -93,6 +94,7 @@ def train(
         kwargs["noise_clip"] = noise_clip * max_action
         kwargs["policy_freq"] = policy_freq
         kwargs["prioritized_replay"] = prioritized_replay
+        kwargs["use_rank"] = use_rank
         policy = TD3.TD3(**kwargs)
     elif policy == "OurDDPG":
         policy = OurDDPG.DDPG(**kwargs)
@@ -175,6 +177,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
     parser.add_argument("--smoke_test", default=False, action='store_true')             # Include this flag to run a smoke test
+    parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
+    
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
@@ -210,6 +214,8 @@ if __name__ == "__main__":
     kwargs["seed"] = args.seed
     kwargs["policy"] = args.policy
     kwargs["prioritized_replay"] = args.prioritized_replay
+    kwargs["use_rank"] = args.use_rank
+
     kwargs["env_name"] = args.env
     kwargs["discount"] = args.discount
     kwargs["tau"] = args.tau
