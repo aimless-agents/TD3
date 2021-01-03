@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from numba import jit
 
 
 class ReplayBuffer(object):
@@ -49,6 +50,8 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         self.start_timesteps = start_timesteps
         self.max_timesteps = max_timesteps
         self.train_timesteps = max_timesteps - start_timesteps - self.adjustment
+        self.rank_ctr = 0
+        self.norm_list = np.zeros(max_size)
 
         self.alpha = float(alpha)
         self.beta = beta
@@ -59,25 +62,28 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         super().add(state, action, next_state, reward, done)
 
     def rank_probs(self):
-        problist = list(enumerate(self.priority[:self.size]))
-        problist.sort(key=lambda priority : priority[1])
-        ranklist = [(len(problist) - new_idx, old_idx) for (new_idx, (old_idx, _)) in enumerate(problist)]
-        batched_ranklist = [(1/np.ceil((rank/len(ranklist)) * 256), i) for rank, i in ranklist]
-        batched_ranklist.sort(key=lambda rankidx : rankidx[1])
-        new_list = [score for score, idx in batched_ranklist]
-
-        return new_list / sum(new_list)
+        if self.rank_ctr % 1e6 == 0:
+            problist = list(enumerate([self.priority[:self.size]]))
+            problist.sort(key=lambda priority : priority[1])
+            ranklist = [(len(problist) - new_idx, old_idx) for (new_idx, (old_idx, _)) in enumerate(problist)]
+            batched_ranklist = [(1/np.ceil((rank/len(ranklist)) * 256), i) for rank, i in ranklist]
+            batched_ranklist.sort(key=lambda rankidx : rankidx[1])
+            new_list = [score for score, idx in batched_ranklist]
+            norm_list = new_list / np.sum(new_list)
+            self.norm_list[:self.size] = norm_list
 
 
     def sample(self, batch_size, use_rank=False):
         if use_rank:
-            self.prob = self.rank_probs()
+            self.rank_probs()
+            self.prob = self.norm_list[:self.size]
+            self.rank_ctr += 1
 
         else:
             scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
-            self.prob = scaled_priorities / np.sum(scaled_priorities)
-        self.ind = np.random.choice(
-            self.size, p=self.prob, size=batch_size, replace=True)
+            self.prob = scaled_priorities
+        self.prob /= np.sum(self.prob)
+        self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
         self.weights = self.compute_weights()
 
         self.beta = min(self.beta + (1.0 / (self.train_timesteps - self.start_timesteps)), 1.0)
