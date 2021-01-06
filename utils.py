@@ -63,7 +63,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
     def rank_probs(self):
         if self.rank_ctr % 1e6 == 0:
-            problist = list(enumerate([self.priority[:self.size]]))
+            problist = list(enumerate(self.priority[:self.size]))
             problist.sort(key=lambda priority : priority[1])
             ranklist = [(len(problist) - new_idx, old_idx) for (new_idx, (old_idx, _)) in enumerate(problist)]
             batched_ranklist = [(1/np.ceil((rank/len(ranklist)) * 256), i) for rank, i in ranklist]
