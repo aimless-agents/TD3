@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from numba import jit
+import matplotlib.pyplot as plt
 
 
 class ReplayBuffer(object):
@@ -52,6 +53,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         self.train_timesteps = max_timesteps - start_timesteps - self.adjustment
         self.rank_ctr = 0
         self.norm_list = np.zeros(max_size)
+        self.batched_ranklist = np.zeros(max_size)
 
         self.alpha = float(alpha)
         self.beta = beta
@@ -62,11 +64,18 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         super().add(state, action, next_state, reward, done)
 
     def rank_probs(self):
-        if self.rank_ctr % 1e6 == 0:
+        if self.rank_ctr % 256 == 0:
             problist = list(enumerate(self.priority[:self.size]))
             problist.sort(key=lambda priority : priority[1])
             ranklist = [(len(problist) - new_idx, old_idx) for (new_idx, (old_idx, _)) in enumerate(problist)]
-            batched_ranklist = [(1/np.ceil((rank/len(ranklist)) * 256), i) for rank, i in ranklist]
+            batched_ranklist = [(1.0/rank, i) for rank, i in ranklist]
+            '''
+            each segment is of size self.size/batch_size S
+            sample 1
+            '''
+            self.batched_ranklist = batched_ranklist.copy()
+            self.batched_ranklist.sort(key=lambda rankidx : rankidx[0], reverse=True)
+            
             batched_ranklist.sort(key=lambda rankidx : rankidx[1])
             new_list = [score for score, idx in batched_ranklist]
             norm_list = new_list / np.sum(new_list)
@@ -76,15 +85,36 @@ class PrioritizedReplayBuffer(ReplayBuffer):
     def sample(self, batch_size, use_rank=False):
         if use_rank:
             self.rank_probs()
-            self.prob = self.norm_list[:self.size]
+            # self.prob = self.norm_list[:self.size]
+            # self.prob /= np.sum(self.prob)
+            # self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
+            self.ind = np.zeros(batch_size)
+            self.prob = np.zeros(batch_size)
+
+            # prelim_p = np.zeros(batch_size)
+            # p = np.zeros(batch_size)
+            for i in range(256):
+                S = (len(self.batched_ranklist)//batch_size)
+                if i==255:
+                    segment = self.batched_ranklist[i * S:]
+                else:
+                    segment = self.batched_ranklist[i * S:(i * S) + S]
+                p = np.array([rank for (rank, _) in segment])
+                p /= np.sum(p)
+                rand_choice = np.random.choice(len(segment), p=p)
+                self.ind[i] = segment[rand_choice][1]
+                self.prob[i] = segment[rand_choice][0]
+            self.ind = self.ind.astype(int)
             self.rank_ctr += 1
+
+            
 
         else:
             scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
             self.prob = scaled_priorities
-        self.prob /= np.sum(self.prob)
-        self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
-        self.weights = self.compute_weights()
+            self.prob /= np.sum(self.prob)
+            self.ind = np.random.choice(self.size, p=self.prob, size=batch_size, replace=True)
+        self.weights = self.compute_weights(use_rank)
 
         self.beta = min(self.beta + (1.0 / (self.train_timesteps - self.start_timesteps)), 1.0)
 
@@ -96,11 +126,18 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             torch.FloatTensor(self.not_done[self.ind]).to(self.device)
         )
 
+    def plot(self, list_to_plot):
+        plt.plot(np.arange(len(list_to_plot)), list_to_plot)
+        plt.show()
+
     def update_priority(self, td_error):
         self.priority[self.ind] = np.abs(td_error.detach().numpy())
 
-    def compute_weights(self):
-        weights = ((1.0 / self.size) * (1.0 / np.take(self.prob, self.ind)))
+    def compute_weights(self, use_rank):
+        if use_rank:
+            weights = ((1.0 / self.size) * (1.0 / self.prob))
+        else:
+            weights = ((1.0 / self.size) * (1.0 / np.take(self.prob, self.ind)))
         beta_weights = np.power(weights, self.beta)
         return beta_weights / np.max(beta_weights)
 

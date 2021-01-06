@@ -76,7 +76,8 @@ class TD3(object):
 		policy_noise=0.2,
 		noise_clip=0.5,
 		policy_freq=2,
-		use_rank=False
+		use_rank=False,
+        use_hindsight=False
 	):
 
 		self.actor = Actor(state_dim, action_dim, max_action).to(device)

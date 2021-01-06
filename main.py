@@ -75,6 +75,7 @@ if __name__ == "__main__":
     # Whether or not to use prioritized replay buffer
     parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
     parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
+    parser.add_argument("--use_hindsight", default=False, action="store_true")               # Include this flag to use HER
     # initial alpha value for PER
     parser.add_argument("--alpha", default=1.0)
     args = parser.parse_args()
@@ -117,6 +118,8 @@ if __name__ == "__main__":
         kwargs["policy_freq"] = args.policy_freq
         kwargs["prioritized_replay"] = args.prioritized_replay
         kwargs["use_rank"] = args.use_rank
+        kwargs["use_hindsight"] = args.use_hindsight
+        
         policy = TD3.TD3(**kwargs)
     elif args.policy == "OurDDPG":
         policy = OurDDPG.DDPG(**kwargs)
