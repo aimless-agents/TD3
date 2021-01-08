@@ -8,14 +8,18 @@ import utils
 import TD3
 import OurDDPG
 import DDPG
+from our_reacher_env import OurReacherEnv
 
 import pybulletgym
 
 
 # Runs policy for X episodes and returns reward average and std
 # A fixed seed is used for the eval environment
-def eval_policy(policy, env_name, seed, eval_episodes=10):
-    eval_env = gym.make(env_name)
+def eval_policy(policy, env_name, seed, eval_episodes=10, custom_env=False):
+    if custom_env:
+        eval_env = OurReacherEnv()
+    else:
+        eval_env = gym.make(env_name)
     eval_env.seed(seed + 100)
 
     rewards = np.zeros(eval_episodes)
@@ -23,6 +27,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10):
         returns = 0.0
         state, done = eval_env.reset(), False
         while not done:
+            import pdb; pdb.set_trace()
             action = policy.select_action(np.array(state))
             state, reward, done, _ = eval_env.step(action)
             returns += reward
@@ -45,6 +50,8 @@ if __name__ == "__main__":
     parser.add_argument("--policy", default="TD3")
     # OpenAI gym environment name
     parser.add_argument("--env", default="HalfCheetah-v2")
+    # our custom environment name
+    parser.add_argument("--custom_env", default=False, action="store_true")
     # Sets Gym, PyTorch and Numpy seeds
     parser.add_argument("--seed", default=0, type=int)
     # Time steps initial random policy is used
@@ -91,7 +98,10 @@ if __name__ == "__main__":
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
 
-    env = gym.make(args.env)
+    if args.custom_env:
+        env = OurReacherEnv()
+    else:
+        env = gym.make(args.env)
 
     # Set seeds
     env.seed(args.seed)
@@ -138,7 +148,7 @@ if __name__ == "__main__":
         replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
 
     # Evaluate untrained policy
-    evaluations = [eval_policy(policy, args.env, args.seed)]
+    evaluations = [eval_policy(policy, args.env, args.seed, custom_env=args.custom_env)]
 
     state, done = env.reset(), False
     episode_reward = 0
@@ -160,6 +170,7 @@ if __name__ == "__main__":
             ).clip(-max_action, max_action)
 
         # Perform action
+        import pdb; pdb.set_trace()
         next_state, reward, done, _ = env.step(action)
         done_bool = float(
             done) if episode_timesteps < env._max_episode_steps else 0
@@ -186,7 +197,7 @@ if __name__ == "__main__":
 
         # Evaluate episode
         if (t + 1) % args.eval_freq == 0:
-            evaluations.append(eval_policy(policy, args.env, args.seed))
+            evaluations.append(eval_policy(policy, args.env, args.seed, custom_env=args.custom_env))
             np.save(f"./results/{file_name}_beta", evaluations)
             if args.save_model:
                 policy.save(f"./models/{file_name}")
