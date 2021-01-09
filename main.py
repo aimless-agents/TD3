@@ -65,9 +65,9 @@ if __name__ == "__main__":
     # Batch size for both actor and critic
     parser.add_argument("--batch_size", default=256, type=int)
     # Discount factor
-    parser.add_argument("--discount", default=0.99)
+    parser.add_argument("--discount", default=0.99, type=float)
     # Target network update rate
-    parser.add_argument("--tau", default=0.005)
+    parser.add_argument("--tau", default=0.005, type=float)
     # Noise added to target policy during critic update
     parser.add_argument("--policy_noise", default=0.2)
     # Range to clip target policy noise
