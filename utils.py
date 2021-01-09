@@ -107,8 +107,6 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             self.ind = self.ind.astype(int)
             self.rank_ctr += 1
 
-            
-
         else:
             scaled_priorities = np.power(self.priority, self.alpha)[:self.size]
             self.prob = scaled_priorities
