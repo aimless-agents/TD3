@@ -6,12 +6,14 @@ class OurReacher(Reacher):
         super().__init__()
 
     def our_calc_state(self, g):
-        import pdb; pdb.set_trace()
+        assert g.shape[0] == 2
         theta, self.theta_dot = self.central_joint.current_relative_position()
         self.gamma, self.gamma_dot = self.elbow_joint.current_relative_position()
         target_x, _ = self.jdict["target_x"].current_position()
         target_y, _ = self.jdict["target_y"].current_position()
-        self.to_target_vec = np.array(self.fingertip.pose().xyz()) - np.array([g[0], g[1], 0.01])
+        self.to_target_vec = np.array(
+            self.fingertip.pose().xyz()) - \
+                np.array([g[0], g[1], 0.01])
         return np.array([
             target_x,
             target_y,

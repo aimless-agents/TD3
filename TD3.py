@@ -99,6 +99,7 @@ class TD3(object):
 
 		self.prioritized_replay = prioritized_replay
 		self.use_rank = use_rank
+		self.use_hindsight = use_hindsight
 
 
 	def select_action(self, state):

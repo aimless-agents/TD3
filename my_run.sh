@@ -8,5 +8,5 @@ do
 	--policy "TD3" \
 	--custom_env \
 	--seed $i \
-	--prioritized_replay
+	--use_hindsight
 done

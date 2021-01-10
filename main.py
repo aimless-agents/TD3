@@ -15,7 +15,8 @@ import pybulletgym
 
 # Runs policy for X episodes and returns reward average and std
 # A fixed seed is used for the eval environment
-def eval_policy(policy, env_name, seed, eval_episodes=10, custom_env=False):
+def eval_policy(policy, env_name, seed, eval_episodes=10, 
+        custom_env=False):
     if custom_env:
         eval_env = OurReacherEnv()
     else:
@@ -26,11 +27,21 @@ def eval_policy(policy, env_name, seed, eval_episodes=10, custom_env=False):
     for i in range(eval_episodes):
         returns = 0.0
         state, done = eval_env.reset(), False
+        if custom_env and policy.use_hindsight:
+            goal = eval_env.sample_goal_state(sigma=0)
         while not done:
-            import pdb; pdb.set_trace()
-            action = policy.select_action(np.array(state))
-            state, reward, done, _ = eval_env.step(action)
+            if policy.use_hindsight:
+                x = np.concatenate([np.array(state), goal])
+            else:
+                x = np.array(state)
+            action = policy.select_action(x)
+            if custom_env:
+                state, reward, done, _ = eval_env.our_step(action, goal)
+
+            else:
+                state, reward, done, _ = eval_env.step(action)
             returns += reward
+        import pdb; pdb.set_trace()
 
         rewards[i] = returns
 
@@ -109,6 +120,12 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
 
     state_dim = env.observation_space.shape[0]
+    if args.use_hindsight:          # include both current state and goal state
+        if args.custom_env:
+            state_dim += 2      # reacher nonsense; goal = (x, y)
+        else:
+            state_dim *= 2
+
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
 
@@ -155,28 +172,44 @@ if __name__ == "__main__":
     episode_timesteps = 0
     episode_num = 0
 
+    trajectory = []
+
     for t in range(int(args.max_timesteps)):
 
         episode_timesteps += 1
+        
+        if args.use_hindsight:
+            goal = env.sample_goal_state()
 
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
+            if args.use_hindsight:
+                x = np.concatenate([np.array(state), goal])
+            else:
+                x = np.array(state)
             action = (
-                policy.select_action(np.array(state))
+                policy.select_action(x) 
                 + np.random.normal(0, max_action *
                                    args.expl_noise, size=action_dim)
             ).clip(-max_action, max_action)
 
         # Perform action
-        import pdb; pdb.set_trace()
-        next_state, reward, done, _ = env.step(action)
+        # TODO: make this more modular
+        if args.custom_env:
+            next_state, reward, done, _ = env.our_step(action, goal)
+        else:
+            next_state, reward, done, _ = env.step(action)
         done_bool = float(
             done) if episode_timesteps < env._max_episode_steps else 0
 
+        next_x = np.concatenate([np.array(next_state), goal]) if args.use_hindsight \
+            else np.array(next_state)
+            
         # Store data in replay buffer
-        replay_buffer.add(state, action, next_state, reward, done_bool)
+        replay_buffer.add(x, action, next_x, reward, done_bool)
+        trajectory.append((state, action, np.array(next_state), reward, done_bool))
 
         state = next_state
         episode_reward += reward
@@ -186,6 +219,16 @@ if __name__ == "__main__":
             policy.train(replay_buffer, args.batch_size)
 
         if done:
+            if args.use_hindsight:
+                for i in range(len(trajectory) - 1):
+                    import pdb; pdb.set_trace()
+                    old_state, old_action, old_next_state, _, old_done_bool = trajectory[i]
+                    ng, _, _, _, _ = np.random.choice(trajectory[i:])
+                    new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
+                    x = np.concatenate([old_state, new_goal])
+                    next_x = np.concatenate([old_next_state, new_goal])
+                    replay_buffer.add(x, old_action, next_x, env.goal_cond_reward(old_next_state, new_goal), old_done_bool)
+
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(
                 f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f}")
@@ -194,6 +237,8 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+
+            trajectory = []
 
         # Evaluate episode
         if (t + 1) % args.eval_freq == 0:
