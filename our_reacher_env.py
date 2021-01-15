@@ -7,7 +7,8 @@ class OurReacherEnv(ReacherBulletEnv):
     def __init__(self):
         self.robot = OurReacher()
         BaseBulletEnv.__init__(self, self.robot)
-        self.epsilon = 5e-2
+
+        self.epsilon = 5e-3
         self._max_episode_steps = 150    # copied manually from ReacherEnv
         self.g = np.zeros(2)
         self.original_rewards = None
