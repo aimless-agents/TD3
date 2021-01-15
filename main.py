@@ -12,7 +12,6 @@ from our_reacher_env import OurReacherEnv
 
 import pybulletgym
 
-
 # Runs policy for X episodes and returns reward average and std
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10, 
@@ -35,11 +34,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
             else:
                 x = np.array(state)
             action = policy.select_action(x)
-            if custom_env:
-                state, reward, done, _ = eval_env.our_step(action, goal)
-
-            else:
-                state, reward, done, _ = eval_env.step(action)
+            state, reward, done, _ = eval_env.step(action)
             returns += reward
         import pdb; pdb.set_trace()
 
@@ -94,6 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
     parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
     parser.add_argument("--use_hindsight", default=False, action="store_true")               # Include this flag to use HER
+        # to use HER, the environment must implement `goal_cond_reward`
     # initial alpha value for PER
     parser.add_argument("--alpha", default=1.0)
     args = parser.parse_args()
@@ -181,14 +177,11 @@ if __name__ == "__main__":
         if args.use_hindsight:
             goal = env.sample_goal_state()
 
+        x = np.concatenate([np.array(state), goal]) if args.use_hindsight else np.array(state)
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
-            if args.use_hindsight:
-                x = np.concatenate([np.array(state), goal])
-            else:
-                x = np.array(state)
             action = (
                 policy.select_action(x) 
                 + np.random.normal(0, max_action *
@@ -196,16 +189,15 @@ if __name__ == "__main__":
             ).clip(-max_action, max_action)
 
         # Perform action
-        # TODO: make this more modular
-        if args.custom_env:
-            next_state, reward, done, _ = env.our_step(action, goal)
-        else:
-            next_state, reward, done, _ = env.step(action)
+        next_state, reward, done, _ = env.step(action)
         done_bool = float(
             done) if episode_timesteps < env._max_episode_steps else 0
 
-        next_x = np.concatenate([np.array(next_state), goal]) if args.use_hindsight \
-            else np.array(next_state)
+        if args.use_hindsight:
+            next_x = np.concatenate([np.array(next_state), goal])
+            reward = env.goal_cond_reward(next_state, goal)     # store the goal-conditioned reward in buffer
+        else:
+            next_x = np.array(next_state)
             
         # Store data in replay buffer
         replay_buffer.add(x, action, next_x, reward, done_bool)
