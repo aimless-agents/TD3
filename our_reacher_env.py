@@ -7,20 +7,34 @@ class OurReacherEnv(ReacherBulletEnv):
     def __init__(self):
         self.robot = OurReacher()
         BaseBulletEnv.__init__(self, self.robot)
-        self.epsilon = 1e-3
+        self.epsilon = 5e-2
         self._max_episode_steps = 150    # copied manually from ReacherEnv
+        self.g = np.zeros(2)
+        self.original_rewards = None
+
+    def set_goal(self, g):
+        self.g = g
 
     # g should be shape (9,)
-    def our_step(self, a, g):
+    def step(self, a):
         assert (not self.scene.multiplayer)
-        assert g.shape[0] == 9
         self.robot.apply_action(a)
         self.scene.global_step()
 
-        state = self.robot.our_calc_state(g)  # sets self.to_target_vec
+        state = self.robot.our_calc_state(self.g)  # sets self.to_target_vec
         within_goal = all(np.abs(self.robot.to_target_vec) < self.epsilon)
 
+        potential_old = self.potential
+        self.potential = self.robot.calc_potential()
+
+        electricity_cost = (
+                -0.10 * (np.abs(a[0] * self.robot.theta_dot) + np.abs(a[1] * self.robot.gamma_dot))  # work torque*angular_velocity
+                - 0.01 * (np.abs(a[0]) + np.abs(a[1]))  # stall torque require some energy
+        )
+        stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
+
         self.rewards = [100 if within_goal else 0]
+        self.original_rewards = sum([float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)])
         self.HUD(state, a, False)
         return state, sum(self.rewards), all(np.abs(self.robot.to_target_vec) < 1e-4), {}
 
@@ -31,6 +45,7 @@ class OurReacherEnv(ReacherBulletEnv):
 
         to_goal_vec = np.array(state[0] + state[2], state[1] + state[3]) - goal
         within_goal = all(np.abs(to_goal_vec) < self.epsilon)
+        # print("actual reward: ", np.abs(to_goal_vec), " vs: ", self.epsilon)
 
         # maybe make this 1???
         return 100 if within_goal else 0

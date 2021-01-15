@@ -4,13 +4,11 @@
 
 for ((i=0;i<1;i+=1))
 do 
-	python3.6 tune_td3.py \
+	python3.6 main.py \
 	--policy "TD3" \
-	--env "HalfCheetahMuJoCoEnv-v0" \
-    --discount 0.996 \
-    --tau 0.0005 \
-    --prioritized_replay \
-    --use_rank \
+	--env "ReacherPyBulletEnv-v0" \
+	--custom_env \
+	--use_hindsight \
 	--seed $i
 
     # python3.6 tune_td3.py \
