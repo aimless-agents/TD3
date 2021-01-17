@@ -14,7 +14,6 @@ import warnings
 import ray 
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
-from ray.tune.schedulers import ASHAScheduler
 
 
 # Runs policy for X episodes and returns average reward
@@ -257,7 +256,7 @@ if __name__ == "__main__":
     parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
     parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
-    parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # alpha to use for PER
+    parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
