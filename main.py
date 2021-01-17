@@ -3,16 +3,21 @@ import torch
 import gym
 import argparse
 import os
+import sys
 
 import utils
 import TD3
 import OurDDPG
 import DDPG
-from our_reacher_env import OurReacherEnv
+import warnings
 
-import pybulletgym
+import ray 
+from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.schedulers import ASHAScheduler
 
-# Runs policy for X episodes and returns reward average and std
+
+# Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10, 
         custom_env=False):
@@ -57,62 +62,17 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
     print("---------------------------------------")
     return [avg_reward, std_reward]
 
-
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    # Policy name (TD3, DDPG or OurDDPG)
-    parser.add_argument("--policy", default="TD3")
-    # OpenAI gym environment name
-    parser.add_argument("--env", default="HalfCheetah-v2")
-    # our custom environment name
-    parser.add_argument("--custom_env", default=False, action="store_true")
-    # Sets Gym, PyTorch and Numpy seeds
-    parser.add_argument("--seed", default=0, type=int)
-    # Time steps initial random policy is used
-    parser.add_argument("--start_timesteps", default=25e3, type=int)
-    # How often (time steps) we evaluate
-    parser.add_argument("--eval_freq", default=5e3, type=int)
-    # Max time steps to run environment
-    parser.add_argument("--max_timesteps", default=1e6, type=int)
-    # Std of Gaussian exploration noise
-    parser.add_argument("--expl_noise", default=0.1)
-    # Batch size for both actor and critic
-    parser.add_argument("--batch_size", default=256, type=int)
-    # Discount factor
-    parser.add_argument("--discount", default=0.99, type=float)
-    # Target network update rate
-    parser.add_argument("--tau", default=0.005, type=float)
-    # Noise added to target policy during critic update
-    parser.add_argument("--policy_noise", default=0.2)
-    # Range to clip target policy noise
-    parser.add_argument("--noise_clip", default=0.5)
-    # Frequency of delayed policy updates
-    parser.add_argument("--policy_freq", default=2, type=int)
-    # Save model and optimizer parameters
-    parser.add_argument("--save_model", action="store_true")
-    # Model load file name, "" doesn't load, "default" uses file_name
-    parser.add_argument("--load_model", default="")
-
-    # Whether or not to use prioritized replay buffer
-    parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
-    parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
-    parser.add_argument("--use_hindsight", default=False, action="store_true")               # Include this flag to use HER
-        # to use HER, the environment must implement `goal_cond_reward`
-    # initial alpha value for PER
-    parser.add_argument("--alpha", default=1.0)
-    args = parser.parse_args()
-
-    file_name = f"{args.policy}_{args.env}_{args.seed}"
-    print("---------------------------------------")
-    print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
-    print("---------------------------------------")
-
+def train(config, args):
     if not os.path.exists("./results"):
         os.makedirs("./results")
 
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
+
+    file_name = f"{args.policy}_{args.env}_{args.seed}"
+    print("---------------------------------------")
+    print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
+    print("---------------------------------------")
 
     if args.custom_env:
         # env = OurReacherEnv()
@@ -122,24 +82,30 @@ if __name__ == "__main__":
                             max_episode_steps=150,
                             reward_threshold=100.0,
                             )
-        env = gym.make('OurReacher-v0')
-
+        env = gym.make('OurReacher-v0', epsilon=args.reacher_epsilon)
     else:
         env = gym.make(args.env)
+
+    if args.tune_run:
+        if args.prioritized_replay:
+            args.alpha = float(config["alpha"])
+            args.beta = float(config["beta"])
+        else:
+            args.discount = float(config["discount"])
+            args.tau = float(config["tau"])
 
     # Set seeds
     env.seed(args.seed)
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-
+    
     state_dim = env.observation_space.shape[0]
     if args.use_hindsight:          # include both current state and goal state
         if args.custom_env:
-            state_dim += 2      # reacher nonsense; goal = (x, y)
+            state_dim += 2          # reacher nonsense; goal = (x, y)
         else:
             state_dim *= 2
-
-    action_dim = env.action_space.shape[0]
+    action_dim = env.action_space.shape[0] 
     max_action = float(env.action_space.high[0])
 
     kwargs = {
@@ -173,10 +139,10 @@ if __name__ == "__main__":
     if args.prioritized_replay:
         replay_buffer = utils.PrioritizedReplayBuffer(state_dim, action_dim,
                                                       args.max_timesteps, args.start_timesteps,
-                                                      alpha=args.alpha)
+                                                      alpha=args.alpha, beta=args.beta)
     else:
         replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
-
+    
     # Evaluate untrained policy
     evaluations = [eval_policy(policy, args.env, args.seed, custom_env=args.custom_env)]
 
@@ -190,38 +156,34 @@ if __name__ == "__main__":
     trajectory = []
 
     for t in range(int(args.max_timesteps)):
-
-        episode_timesteps += 1
         
+        episode_timesteps += 1
         if args.use_hindsight:
             goal = env.sample_goal_state()
-
         x = np.concatenate([np.array(state), goal]) if args.use_hindsight else np.array(state)
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
             action = (
-                policy.select_action(x) 
-                + np.random.normal(0, max_action *
-                                   args.expl_noise, size=action_dim)
+                policy.select_action(np.array(state))
+                + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
             ).clip(-max_action, max_action)
 
         # Perform action
         if args.use_hindsight:
             env.set_goal(goal)
         next_state, reward, done, _ = env.step(action)
-        done_bool = float(
-            done) if episode_timesteps < env._max_episode_steps else 0
+        done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
         if args.use_hindsight:
             next_x = np.concatenate([np.array(next_state), goal])
-            # reward = env.goal_cond_reward(next_state, goal)     # store the goal-conditioned reward in buffer
         else:
             next_x = np.array(next_state)
-            
+
         # Store data in replay buffer
-        replay_buffer.add(x, action, next_x, reward, done_bool)
+        replay_buffer.add(state, action, next_state, reward, done_bool)
+
         trajectory.append((state, action, np.array(next_state), reward, done_bool))
 
         state = next_state
@@ -262,3 +224,83 @@ if __name__ == "__main__":
             np.save(f"./results/{file_name}_beta", evaluations)
             if args.save_model:
                 policy.save(f"./models/{file_name}")
+
+if __name__ == "__main__":
+
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.environ["PYTHONPATH"] = parent_dir + ":" + os.environ.get("PYTHONPATH", "")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--policy", default="TD3")                  # Policy name (TD3, DDPG or OurDDPG)
+    parser.add_argument("--env", default="HalfCheetahMuJoCoEnv-v0") # OpenAI gym environment name
+    parser.add_argument("--seed", default=0, type=int)              # Sets Gym, PyTorch and Numpy seeds
+    parser.add_argument("--start_timesteps", default=25e3, type=int)# Time steps initial random policy is used
+    parser.add_argument("--eval_freq", default=5e3, type=int)       # How often (time steps) we evaluate
+    parser.add_argument("--max_timesteps", default=75e4, type=int)  # Max time steps to run environment
+    parser.add_argument("--expl_noise", default=0.1)                # Std of Gaussian exploration noise
+    parser.add_argument("--batch_size", default=256, type=int)      # Batch size for both actor and critic
+    parser.add_argument("--discount", default=0.99, type=float)     # Discount factor
+    parser.add_argument("--tau", default=0.005, type=float)         # Target network update rate
+    parser.add_argument("--beta", default=0.0, type=float)          # Beta annealing step-size (should be 1/max_timesteps) for PER
+    parser.add_argument("--alpha", default=1.0, type=float)         # alpha to use for PER
+    parser.add_argument("--policy_noise", default=0.2)              # Noise added to target policy during critic update
+    parser.add_argument("--noise_clip", default=0.5)                # Range to clip target policy noise
+    parser.add_argument("--policy_freq", default=2, type=int)       # Frequency of delayed policy updates
+    parser.add_argument("--save_model", action="store_true")        # Save model and optimizer parameters
+    parser.add_argument("--load_model", default="")                 # Model load file name, "" doesn't load, "default" uses file_name
+
+    parser.add_argument("--prioritized_replay", default=False, action='store_true')		# Include this flag to use prioritized replay buffer
+    parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
+    parser.add_argument("--use_hindsight", default=False, action="store_true")          # Include this flag to use HER
+    parser.add_argument("--smoke_test", default=False, action='store_true')             # Include this flag to run a smoke test
+    
+    parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
+    parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
+    parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
+    parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # alpha to use for PER
+    args = parser.parse_args()
+    print("---------------------------------------")
+    print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
+    print("---------------------------------------")
+
+    if "cluster" in args.run_type:
+        ray.init(address='auto', _redis_password='5241590000000000', log_to_driver=False)
+    
+    config = {}
+    if args.tune_run:
+        if args.prioritized_replay:
+            config = {
+                "beta": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.4, 0.5]),
+                "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6])
+            }
+        else: 
+            config = {
+                "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
+                "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
+            }
+
+    kwargs = {}
+
+
+
+    if args.smoke_test:
+        args.start_timesteps = 25
+        args.max_timesteps = 75
+        args.eval_freq = 5
+
+    kwargs["args"] = args
+    
+    if args.tune_run:
+        result = tune.run(
+            tune.with_parameters(train, **kwargs),
+            local_dir=os.path.join(os.getcwd(), "results", "tune_results"),
+            num_samples=1,
+            scheduler=ASHAScheduler(metric="episode_reward_mean", mode="max"),
+            config=config
+        )
+
+        best_trial = result.get_best_trial("episode_reward_mean", "max", "last")
+        print("best trial: ", best_trial.config)
+        print("best trial last result: ", best_trial.last_result)
+    else:
+        train(config, **kwargs)
