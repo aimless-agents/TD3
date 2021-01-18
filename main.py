@@ -165,7 +165,7 @@ def train(config, args):
             action = env.action_space.sample()
         else:
             action = (
-                policy.select_action(np.array(state))
+                policy.select_action(np.array(x))
                 + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
             ).clip(-max_action, max_action)
 
@@ -181,7 +181,7 @@ def train(config, args):
             next_x = np.array(next_state)
 
         # Store data in replay buffer
-        replay_buffer.add(state, action, next_state, reward, done_bool)
+        replay_buffer.add(x, action, next_x, reward, done_bool)
 
         trajectory.append((state, action, np.array(next_state), reward, done_bool))
 
@@ -219,10 +219,13 @@ def train(config, args):
 
         # Evaluate episode
         if (t + 1) % args.eval_freq == 0:
-            evaluations.append(eval_policy(policy, args.env, args.seed, custom_env=args.custom_env))
+            evaled_policy = eval_policy(policy, args.env, args.seed, custom_env=args.custom_env)
+            evaluations.append(evaled_policy)
             np.save(f"./results/{file_name}_beta", evaluations)
             if args.save_model:
                 policy.save(f"./models/{file_name}")
+            if args.tune_run:
+                tune.report(episode_reward_mean=evaled_policy[0])
 
 if __name__ == "__main__":
 
