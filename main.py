@@ -59,7 +59,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
     print("---------------------------------------")
     print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f} with original reward as {avg_original_reward:.3f}")
     print("---------------------------------------")
-    return [avg_reward, std_reward]
+    return [avg_reward, std_reward, avg_original_reward]
 
 def train(config, args):
     if not os.path.exists("./results"):
