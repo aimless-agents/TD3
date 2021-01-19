@@ -68,7 +68,7 @@ def train(config, args):
 
     file_name = f"{args.policy}_{args.env}_{args.seed}"
     print("---------------------------------------")
-    print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
+    print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
     if args.custom_env:
@@ -80,7 +80,7 @@ def train(config, args):
                             reward_threshold=100.0,
                             )
         # import pdb; pdb.set_trace()
-        epsilon = float(config['epsilon']) if args.run_type == 'cluster' else args.reacher_epsilon
+        epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
         env = gym.make('OurReacher-v0', epsilon=epsilon)
     else:
         env = gym.make(args.env)
@@ -90,8 +90,8 @@ def train(config, args):
             args.alpha = float(config["alpha"])
             args.beta = float(config["beta"])
         else:
-            args.discount = float(config["discount"])
-            args.tau = float(config["tau"])
+            args.discount = float(config.get("discount", args.discount))
+            args.tau = float(config.get("tau", args.tau))
 
     # Set seeds
     env.seed(args.seed)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
     args = parser.parse_args()
     print("---------------------------------------")
-    print(f"Policy: {args.policy}, Env: {args.env}, Seed: {args.seed}")
+    print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
     if "cluster" in args.run_type:
@@ -281,8 +281,7 @@ if __name__ == "__main__":
 
         if args.use_hindsight:
             config = {
-                "discount": tune.grid_search([0.995, 0.999]),
-                "epsilon": tune.grid_search([2e-2, 3e-2, 4e-2, 4.5e-2]),
+                "epsilon": tune.grid_search(list(np.arange(2e-2, 5.5e-2, 5e-3)))
             }
 
     kwargs = {}

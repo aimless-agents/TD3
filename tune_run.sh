@@ -1,19 +1,18 @@
-#!/bin/bash
+# range syntax: (seq <start> <step> <end, exclusive>)
+# sanity check for the range:
+# for i in $(seq 2e-2 5e-3 3.1e-2)
+# do 
+# 	echo $i
+# done
 
-# Script to reproduce results
-
-for ((i=0;i<1;i+=1))
+for i in $(seq 2e-2 5e-3 3.1e-2)
 do 
 	python3.6 main.py \
 	--policy "TD3" \
-	--env "ReacherPyBulletEnv-v0" \
 	--custom_env \
 	--use_hindsight \
-	--seed $i
-
-    # python3.6 tune_td3.py \
-	# --policy "TD3" \
-	# --env "HalfCheetah-v3" \
-    # --save_model \
-	# --seed $i
+	--run_type "local" \
+	--save_model \
+	--reacher_epsilon $i \
+	--seed 0
 done

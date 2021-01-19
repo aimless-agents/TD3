@@ -4,7 +4,7 @@ from our_reacher import OurReacher
 import numpy as np
 
 class OurReacherEnv(ReacherBulletEnv):
-    def __init__(self, epsilon=2e-2):
+    def __init__(self, epsilon=4e-2):
         self.robot = OurReacher()
         BaseBulletEnv.__init__(self, self.robot)
 
@@ -16,7 +16,6 @@ class OurReacherEnv(ReacherBulletEnv):
     def set_goal(self, g):
         self.g = g
 
-    # g should be shape (9,)
     def step(self, a):
         assert (not self.scene.multiplayer)
         self.robot.apply_action(a)
