@@ -81,7 +81,9 @@ def train(config, args):
                             max_episode_steps=150,
                             reward_threshold=100.0,
                             )
-        env = gym.make('OurReacher-v0', epsilon=args.reacher_epsilon)
+        # import pdb; pdb.set_trace()
+        epsilon = float(config['epsilon']) if args.run_type == 'cluster' else args.reacher_epsilon
+        env = gym.make('OurReacher-v0', epsilon=epsilon)
     else:
         env = gym.make(args.env)
 
@@ -279,6 +281,12 @@ if __name__ == "__main__":
             config = {
                 "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
                 "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
+            }
+
+        if args.use_hindsight:
+            config = {
+                "discount": tune.grid_search([0.995, 0.999]),
+                "epsilon": tune.grid_search([2e-2, 3e-2, 4e-2, 4.5e-2]),
             }
 
     kwargs = {}
