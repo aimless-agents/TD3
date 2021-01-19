@@ -34,7 +34,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
         returns = 0.0
         original_returns = 0.0
         state, done = eval_env.reset(), False
-        if custom_env and policy.use_hindsight:
+        if custom_env:
             goal = eval_env.sample_goal_state(sigma=0)
         while not done:
             if policy.use_hindsight:
@@ -42,12 +42,10 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
             else:
                 x = np.array(state)
             action = policy.select_action(x)
-            if policy.use_hindsight:
-                eval_env.set_goal(goal)
+            eval_env.set_goal(goal)
             state, reward, done, _ = eval_env.step(action)
             returns += reward
-            if policy.use_hindsight:
-                original_returns += eval_env.original_rewards
+            original_returns += eval_env.original_rewards
 
         rewards[i] = returns
         original_rewards[i] = original_returns
@@ -59,7 +57,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
     print("---------------------------------------")
     print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f} with original reward as {avg_original_reward:.3f}")
     print("---------------------------------------")
-    return [avg_reward, std_reward]
+    return [avg_reward, std_reward, avg_original_reward]
 
 def train(config, args):
     if not os.path.exists("./results"):
@@ -189,8 +187,7 @@ def train(config, args):
 
         state = next_state
         episode_reward += reward
-        if args.use_hindsight:
-            original_episode_reward += env.original_rewards
+        original_episode_reward += env.original_rewards
 
         # Train agent after collecting sufficient data
         if t >= args.start_timesteps:
@@ -206,7 +203,6 @@ def train(config, args):
                     x = np.concatenate([old_state, new_goal])
                     next_x = np.concatenate([old_next_state, new_goal])
                     replay_buffer.add(x, old_action, next_x, env.goal_cond_reward(old_next_state, new_goal), old_done_bool)
-
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(
                 f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f} Original Reward: {original_episode_reward:.3f}")

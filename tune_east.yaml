@@ -7,14 +7,10 @@ max_workers: 2
 head_node: 
     InstanceType: c3.large
     ImageId: ami-02e86b825fe559330
-    InstanceMarketOptions:
-        MarketType: spot
 
 worker_nodes: 
     InstanceType: c3.large
     ImageId: ami-02e86b825fe559330
-    InstanceMarketOptions:
-        MarketType: spot
 
 setup_commands: # Set up each node.
     - pip install ray torch torchvision tabulate tensorboard gym
