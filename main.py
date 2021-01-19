@@ -66,7 +66,7 @@ def train(config, args):
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
 
-    file_name = f"{args.policy}_{'CustomReacher' if args.custom_env else args.env}_{args.epsilon}"
+    file_name = f"{args.policy}_{'CustomReacher' if args.custom_env else args.env}_{args.reacher_epsilon}"
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
