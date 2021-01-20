@@ -17,7 +17,9 @@ gym.envs.register(
                             )
 # import pdb; pdb.set_trace()
 epsilon = 5e-2
-env = gym.make('OurReacher-v0', epsilon=epsilon)
+env = gym.make('OurReacher-v0', epsilon=epsilon, render=True)
+
+
 state_dim = env.observation_space.shape[0] + 2
 action_dim = env.action_space.shape[0] 
 max_action = float(env.action_space.high[0])
@@ -29,13 +31,13 @@ policy = Actor(state_dim, action_dim, max_action).to(device)
 policy.load_state_dict(torch.load(actor_to_load))
 
 state, done = env.reset(), False
-for i in range(10):
-    print(i)
-    for i in range(150):
-        goal = env.sample_goal_state(sigma=0)
-        env.render()
-        state = np.concatenate([np.array(state), goal])
-        action = select_action(policy, np.array(state))
-        state, reward, done, _ = env.step(action) # take a random action
+for i in range(10000):
+    goal = env.sample_goal_state(sigma=0)
+    env.render()
+    state = np.concatenate([np.array(state), goal])
+    action = select_action(policy, np.array(state))
+    # observation, reward, done, info = env.step(env.action_space.sample())
+    state, reward, done, _ = env.step(action) # take a random action
+    if done:
         state, done = env.reset(), False
 env.close()

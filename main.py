@@ -84,7 +84,7 @@ def train(config, args):
                             )
         # import pdb; pdb.set_trace()
         epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
-        env = gym.make('OurReacher-v0', epsilon=epsilon)
+        env = gym.make('OurReacher-v0', epsilon=epsilon, render=False)
     else:
         env = gym.make(args.env)
 

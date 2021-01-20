@@ -4,9 +4,9 @@ from our_reacher import OurReacher
 import numpy as np
 
 class OurReacherEnv(ReacherBulletEnv):
-    def __init__(self, epsilon=4e-2):
+    def __init__(self, epsilon=4e-2, render=False):
         self.robot = OurReacher()
-        BaseBulletEnv.__init__(self, self.robot)
+        BaseBulletEnv.__init__(self, self.robot, render)
 
         self.epsilon = epsilon
         self._max_episode_steps = 150    # copied manually from ReacherEnv
@@ -33,7 +33,7 @@ class OurReacherEnv(ReacherBulletEnv):
         )
         stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
 
-        self.rewards = [0.1 if within_goal else 0]
+        self.rewards = [0.1 if within_goal and stuck_joint_cost == 0 else 0]
         self.original_rewards = sum([float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)])
         self.HUD(state, a, False)
         return state, sum(self.rewards), all(np.abs(self.robot.to_target_vec) < 1e-4), {}
@@ -47,8 +47,9 @@ class OurReacherEnv(ReacherBulletEnv):
         within_goal = all(np.abs(to_goal_vec) < self.epsilon)
         # print("actual reward: ", np.abs(to_goal_vec), " vs: ", self.epsilon)
 
+        stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
         # maybe make this 1???
-        return 0.1 if within_goal else 0
+        return 0.1 if within_goal and stuck_joint_cost == 0 else 0
 
     # pass in sigma=0 to get the original target goal state
     def sample_goal_state(self, sigma=1e-3):
