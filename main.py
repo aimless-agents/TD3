@@ -14,6 +14,7 @@ import warnings
 import ray 
 from ray import tune
 from ray.tune.schedulers import ASHAScheduler
+import pybulletgym
 
 
 # Runs policy for X episodes and returns average reward
@@ -42,10 +43,12 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
             else:
                 x = np.array(state)
             action = policy.select_action(x)
-            eval_env.set_goal(goal)
+            if custom_env:
+              eval_env.set_goal(goal)
             state, reward, done, _ = eval_env.step(action)
             returns += reward
-            original_returns += eval_env.original_rewards
+            if custom_env:
+              original_returns += eval_env.original_rewards
 
         rewards[i] = returns
         original_rewards[i] = original_returns
@@ -187,7 +190,8 @@ def train(config, args):
 
         state = next_state
         episode_reward += reward
-        original_episode_reward += env.original_rewards
+        if args.custom_env:
+          original_episode_reward += env.original_rewards
 
         # Train agent after collecting sufficient data
         if t >= args.start_timesteps:
