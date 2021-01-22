@@ -11,9 +11,6 @@ import OurDDPG
 import DDPG
 import warnings
 
-import ray 
-from ray import tune
-from ray.tune.schedulers import ASHAScheduler
 import pybulletgym
 
 
@@ -270,6 +267,11 @@ if __name__ == "__main__":
 
     if "cluster" in args.run_type:
         ray.init(address='auto', _redis_password='5241590000000000', log_to_driver=False)
+
+    if args.tune_run:
+        import ray 
+        from ray import tune
+        from ray.tune.schedulers import ASHAScheduler
     
     config = {}
     if args.tune_run:
