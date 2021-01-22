@@ -74,6 +74,8 @@ def train(config, args):
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
+    import pybulletgym
+    warnings.filterwarnings("ignore")
     if args.custom_env:
         # env = OurReacherEnv()
         gym.envs.register(
@@ -82,7 +84,6 @@ def train(config, args):
                             max_episode_steps=150,
                             reward_threshold=100.0,
                             )
-        # import pdb; pdb.set_trace()
         epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
         env = gym.make('OurReacher-v0', epsilon=epsilon, render=False)
     else:
