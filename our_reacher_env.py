@@ -9,12 +9,14 @@ class OurReacherEnv(ReacherBulletEnv):
         BaseBulletEnv.__init__(self, self.robot, render)
 
         self.epsilon = epsilon
-        self._max_episode_steps = 150    # copied manually from ReacherEnv
         self.g = np.zeros(2)
         self.original_rewards = None
 
     def set_goal(self, g):
         self.g = g
+
+    def set_epsilon(self, eps):
+        self.epsilon = eps
 
     def step(self, a):
         assert (not self.scene.multiplayer)

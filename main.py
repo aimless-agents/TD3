@@ -74,14 +74,21 @@ def train(config, args):
     import pybulletgym
     warnings.filterwarnings("ignore")
     if args.custom_env:
-        # env = OurReacherEnv()
         gym.envs.register(
                             id='OurReacher-v0',
                             entry_point='our_reacher_env:OurReacherEnv',
                             max_episode_steps=150,
                             reward_threshold=100.0,
                             )
-        epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
+
+        # set initial and terminal values of epsilon
+        if args.reacher_epsilon_bounds:
+            epsilon = args.reacher_epsilon_bounds[0]
+            min_epsilon = args.reacher_epsilon_bounds[1]
+        else:
+            epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
+            min_epsilon = epsilon
+        epsilon_step = (epsilon - min_epsilon) / (int(args.max_timesteps) / 150)
         env = gym.make('OurReacher-v0', epsilon=epsilon, render=False)
     else:
         env = gym.make(args.env)
@@ -214,6 +221,9 @@ def train(config, args):
             original_episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+            if args.custom_env:
+                epsilon = max(min_epsilon, epsilon - epsilon_step)
+                env.set_epsilon(epsilon)
 
             trajectory = []
 
@@ -260,6 +270,9 @@ if __name__ == "__main__":
     parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
     parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
+
+    # annealing reacher epsilon
+    parser.add_argument("--reacher_epsilon_bounds", nargs=2, type=float)
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
@@ -292,8 +305,6 @@ if __name__ == "__main__":
             }
 
     kwargs = {}
-
-
 
     if args.smoke_test:
         args.start_timesteps = 25
