@@ -69,7 +69,7 @@ def train(config, args):
 
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
-
+ 
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
@@ -147,6 +147,7 @@ def train(config, args):
         f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
         'HER' if args.use_hindsight else '',
         f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds else args.reacher_epsilon}" if args.custom_env else "",
+        f"k{args.k}",
         datetime.now().strftime('%Y%m%d%H%M')
     ]
     exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
@@ -218,14 +219,15 @@ def train(config, args):
 
         if done:
             if args.use_hindsight:
-                for i in range(len(trajectory) - 1):
-                    old_state, old_action, old_next_state, _, old_done_bool = trajectory[i]
-                    idx = np.random.choice(np.arange(i+1, len(trajectory)))
-                    ng, _, _, _, _ = trajectory[idx]
-                    new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
-                    x = np.concatenate([old_state, new_goal])
-                    next_x = np.concatenate([old_next_state, new_goal])
-                    replay_buffer.add(x, old_action, next_x, env.goal_cond_reward(old_next_state, new_goal), old_done_bool)
+                for _ in range(args.k): # factor to increase buffer by
+                    for i in range(len(trajectory) - 1):
+                        old_state, old_action, old_next_state, _, old_done_bool = trajectory[i]
+                        idx = np.random.choice(np.arange(i+1, len(trajectory)))
+                        ng, _, _, _, _ = trajectory[idx]
+                        new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
+                        x = np.concatenate([old_state, new_goal])
+                        next_x = np.concatenate([old_next_state, new_goal])
+                        replay_buffer.add(x, old_action, next_x, env.goal_cond_reward(old_next_state, new_goal), old_done_bool)
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(
                 f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f} Original Reward: {original_episode_reward:.3f}")
@@ -289,6 +291,7 @@ if __name__ == "__main__":
     # annealing reacher epsilon: default is a linear 2e-2 -> 2e-2 (aka constant at 2e-2)
     parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")
     parser.add_argument("--decay_type", default="linear", help="linear or exp epsilon decay")
+    parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
