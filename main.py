@@ -40,9 +40,8 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
             else:
                 x = np.array(state)
             action = policy.select_action(x)
-            # TODO: I don't think we need this, right? -Claire
-            # if custom_env_params:
-            #   eval_env.set_goal(goal)
+            if custom_env_params:
+              eval_env.set_goal(goal)
             state, reward, done, _ = eval_env.step(action)
             returns += reward
             if custom_env_params:
