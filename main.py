@@ -88,7 +88,7 @@ def train(config, args):
         if eps_bounds:
             [a, b] = eps_bounds
         else:
-            epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
+            epsilon = float(config['epsilon']) if args.tune_run else 0.02
             a, b = epsilon, epsilon
         epsilons = utils.epsilon_calc(a, b, args.max_timesteps, args.decay_type)
         env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
@@ -145,7 +145,7 @@ def train(config, args):
         args.policy, 'CustomReacher' if args.custom_env else args.env,
         f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
         'HER' if args.use_hindsight else '',
-        f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds else args.reacher_epsilon}" if args.custom_env else "",
+        f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
         f"k{args.k}",
         datetime.now().strftime('%Y%m%d%H%M')
     ]
@@ -285,7 +285,6 @@ if __name__ == "__main__":
     parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
     parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
-    parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
 
     # annealing reacher epsilon: default is a linear 2e-2 -> 2e-2 (aka constant at 2e-2)
     parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")

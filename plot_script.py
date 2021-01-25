@@ -15,7 +15,6 @@ parser.add_argument("--prioritized_replay", default=False, action='store_true')	
 parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
 parser.add_argument("--use_hindsight", default=False, action="store_true")          # Include this flag to use HER
 parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
-parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
 parser.add_argument("--reacher_epsilon_bounds", nargs=2, type=float)
 args, unknown = parser.parse_known_args()
 if unknown:
@@ -26,7 +25,8 @@ exp_descriptors = [
     args.policy, 'CustomReacher' if args.custom_env else args.env,
     f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
     'HER' if args.use_hindsight else '',
-    f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds else args.reacher_epsilon}" if args.custom_env else ""
+    f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
+    f"k{args.k}",
 ]
 exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
 file_name = "_".join(exp_descriptors)       # file name root (minus timestamp)
