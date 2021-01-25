@@ -1,25 +1,25 @@
 import numpy as np
 import torch
 import gym
+import pybulletgym
 import argparse
 import os
 import sys
+import warnings
+from datetime import datetime
 
 import utils
 import TD3
 import OurDDPG
 import DDPG
-import warnings
-
-import pybulletgym
-
 
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
+# custom_env_params: None if not using custom environment, or 
+#   dictionary containing 'epsilon' to denote epsilon used during training
 def eval_policy(policy, env_name, seed, eval_episodes=10, 
-        custom_env=False):
-    if custom_env:
-        # eval_env = OurReacherEnv()
+        custom_env_params=None):
+    if custom_env_params:
         eval_env = gym.make('OurReacher-v0')
     else:
         eval_env = gym.make(env_name)
@@ -32,7 +32,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
         returns = 0.0
         original_returns = 0.0
         state, done = eval_env.reset(), False
-        if custom_env:
+        if custom_env_params:
             goal = eval_env.sample_goal_state(sigma=0)
         while not done:
             if policy.use_hindsight:
@@ -40,11 +40,12 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
             else:
                 x = np.array(state)
             action = policy.select_action(x)
-            if custom_env:
-              eval_env.set_goal(goal)
+            # TODO: I don't think we need this, right? -Claire
+            # if custom_env_params:
+            #   eval_env.set_goal(goal)
             state, reward, done, _ = eval_env.step(action)
             returns += reward
-            if custom_env:
+            if custom_env_params:
               original_returns += eval_env.original_rewards
 
         rewards[i] = returns
@@ -53,11 +54,14 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
     avg_reward = np.mean(rewards)
     std_reward = np.std(rewards)
     avg_original_reward = np.mean(original_rewards)
+    std_original_reward = np.std(original_rewards)
 
     print("---------------------------------------")
     print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f} with original reward as {avg_original_reward:.3f}")
     print("---------------------------------------")
-    return [avg_reward, std_reward, avg_original_reward]
+    if custom_env_params:
+        return [avg_reward, std_reward, avg_original_reward, std_original_reward, custom_env_params['epsilon']]
+    return [avg_reward, std_reward]
 
 def train(config, args):
     if not os.path.exists("./results"):
@@ -66,30 +70,29 @@ def train(config, args):
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
 
-    file_name = f"{args.policy}_{'CustomReacher' if args.custom_env else args.env}_{args.reacher_epsilon}"
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
     import pybulletgym
     warnings.filterwarnings("ignore")
+    eps_bounds = args.reacher_epsilon_bounds      # just aliasing with shorter variable name
     if args.custom_env:
         gym.envs.register(
-                            id='OurReacher-v0',
-                            entry_point='our_reacher_env:OurReacherEnv',
-                            max_episode_steps=150,
-                            reward_threshold=100.0,
-                            )
+            id='OurReacher-v0',
+            entry_point='our_reacher_env:OurReacherEnv',
+            max_episode_steps=150,
+            reward_threshold=100.0,
+        )
 
-        # set initial and terminal values of epsilon
-        if args.reacher_epsilon_bounds:
-            epsilon = args.reacher_epsilon_bounds[0]
-            min_epsilon = args.reacher_epsilon_bounds[1]
+        # retrieve epsilon range
+        if eps_bounds:
+            [a, b] = eps_bounds
         else:
             epsilon = float(config['epsilon']) if args.tune_run else args.reacher_epsilon
-            min_epsilon = epsilon
-        epsilon_step = (epsilon - min_epsilon) / (int(args.max_timesteps) / 150)
-        env = gym.make('OurReacher-v0', epsilon=epsilon, render=False)
+            a, b = epsilon, epsilon
+        epsilons = utils.epsilon_calc(a, b, args.max_timesteps, args.decay_type)
+        env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
     else:
         env = gym.make(args.env)
 
@@ -139,6 +142,16 @@ def train(config, args):
     elif args.policy == "DDPG":
         policy = DDPG.DDPG(**kwargs)
 
+    exp_descriptors = [
+        args.policy, 'CustomReacher' if args.custom_env else args.env,
+        f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
+        'HER' if args.use_hindsight else '',
+        f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds else args.reacher_epsilon}" if args.custom_env else "",
+        datetime.now().strftime('%Y%m%d%H%M')
+    ]
+    exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
+    file_name = "_".join(exp_descriptors)
+
     if args.load_model != "":
         policy_file = file_name if args.load_model == "default" else args.load_model
         policy.load(f"./models/{policy_file}")
@@ -151,7 +164,8 @@ def train(config, args):
         replay_buffer = utils.ReplayBuffer(state_dim, action_dim)
     
     # Evaluate untrained policy
-    evaluations = [eval_policy(policy, args.env, args.seed, custom_env=args.custom_env)]
+    custom_env_params = {'epsilon': env.epsilon} if args.custom_env else None
+    evaluations = [eval_policy(policy, args.env, args.seed, custom_env_params=custom_env_params)]
 
     state, done = env.reset(), False
 
@@ -222,16 +236,17 @@ def train(config, args):
             episode_timesteps = 0
             episode_num += 1
             if args.custom_env:
-                epsilon = max(min_epsilon, epsilon - epsilon_step)
+                epsilon = epsilons[episode_num]
                 env.set_epsilon(epsilon)
+                custom_env_params['epsilon'] = epsilon
 
             trajectory = []
 
         # Evaluate episode
         if (t + 1) % args.eval_freq == 0:
-            evaled_policy = eval_policy(policy, args.env, args.seed, custom_env=args.custom_env)
+            evaled_policy = eval_policy(policy, args.env, args.seed, custom_env_params=custom_env_params)
             evaluations.append(evaled_policy)
-            np.save(f"./results/{file_name}_beta", evaluations)
+            np.save(f"./results/{file_name}", evaluations)
             if args.save_model:
                 policy.save(f"./models/{file_name}")
             if args.tune_run:
@@ -271,20 +286,21 @@ if __name__ == "__main__":
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
     parser.add_argument("--reacher_epsilon", default=2e-2, type=float)                  # reacher epsilon
 
-    # annealing reacher epsilon
-    parser.add_argument("--reacher_epsilon_bounds", nargs=2, type=float)
+    # annealing reacher epsilon: default is a linear 2e-2 -> 2e-2 (aka constant at 2e-2)
+    parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")
+    parser.add_argument("--decay_type", default="linear", help="linear or exp epsilon decay")
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
 
-    if "cluster" in args.run_type:
-        ray.init(address='auto', _redis_password='5241590000000000', log_to_driver=False)
-
     if args.tune_run:
         import ray 
         from ray import tune
         from ray.tune.schedulers import ASHAScheduler
+
+    if "cluster" in args.run_type:
+        ray.init(address='auto', _redis_password='5241590000000000', log_to_driver=False)
     
     config = {}
     if args.tune_run:

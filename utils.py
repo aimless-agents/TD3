@@ -139,15 +139,17 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         beta_weights = np.power(weights, self.beta)
         return beta_weights / np.max(beta_weights)
 
-class HindsightReplayBuffer(PrioritizedReplayBuffer):   # extend regular RB?
-    def __init__(self, state_dim, action_dim, max_timesteps,
-                 start_timesteps, max_size=int(1e6),
-                 alpha=1.0, beta=0.0):
-        super().__init__(state_dim, action_dim, max_size, 
-            alpha=alpha, beta=beta)
-    
-    def add(self, state, action, next_state, reward, done):
-        pass
+# Calculate the epsilon range given upper+lower bounds, maximum timesteps, decay type.
+# Decay type is either linear or exponential.
+# Assumes that the env is custom reacher environment, 
+#   where episodes are always 150 timesteps (I think??)
+def epsilon_calc(eps_upper, eps_lower, max_timesteps, decay='linear'):
+    num_episodes = int(np.ceil(max_timesteps / 150))     # 150 for custom reacher specifically
+    x = np.arange(num_episodes)
+    if eps_upper == eps_lower:
+        return np.full(num_episodes, eps_upper)
+    if decay == 'linear':
+        epsilon_step = (eps_upper - eps_lower) / num_episodes
+        return np.arange(eps_upper, eps_lower, epsilon_step)
 
-    def sample(self, batch_size):
-        pass
+    return eps_upper * (1 - eps_lower) ** x
