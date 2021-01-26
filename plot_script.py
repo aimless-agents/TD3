@@ -16,6 +16,7 @@ parser.add_argument("--use_rank", default=False, action="store_true")           
 parser.add_argument("--use_hindsight", default=False, action="store_true")          # Include this flag to use HER
 parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
 parser.add_argument("--reacher_epsilon_bounds", nargs=2, type=float)
+parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
 args, unknown = parser.parse_known_args()
 if unknown:
     print("WARNING: unknown arguments:", unknown)
