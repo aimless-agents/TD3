@@ -145,7 +145,7 @@ def train(config, args):
         args.policy, 'CustomReacher' if args.custom_env else args.env,
         f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
         'HER' if args.use_hindsight else '',
-        f"eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
+        f"{args.decay_type}decay-eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
         f"k{args.k}",
         datetime.now().strftime('%Y%m%d%H%M')
     ]
@@ -288,7 +288,7 @@ if __name__ == "__main__":
 
     # annealing reacher epsilon: default is a linear 2e-2 -> 2e-2 (aka constant at 2e-2)
     parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")
-    parser.add_argument("--decay_type", default="linear", help="linear or exp epsilon decay")
+    parser.add_argument("--decay_type", default="linear", help="'linear' or 'exp' epsilon decay")
     parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
     args = parser.parse_args()
     print("---------------------------------------")
