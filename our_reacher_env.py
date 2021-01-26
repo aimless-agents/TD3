@@ -24,7 +24,9 @@ class OurReacherEnv(ReacherBulletEnv):
         self.scene.global_step()
 
         state = self.robot.our_calc_state(self.g)  # sets self.to_target_vec
-        within_goal = all(np.abs(self.robot.to_target_vec) < self.epsilon)
+
+        # euclidean distance < epsilon
+        within_goal = np.sum(self.robot.to_target_vec ** 2) < self.epsilon
 
         potential_old = self.potential
         self.potential = self.robot.calc_potential()
@@ -38,7 +40,7 @@ class OurReacherEnv(ReacherBulletEnv):
         self.rewards = [0.1 if within_goal and stuck_joint_cost == 0 else 0]
         self.original_rewards = sum([float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)])
         self.HUD(state, a, False)
-        return state, sum(self.rewards), all(np.abs(self.robot.to_target_vec) < 1e-4), {}
+        return state, sum(self.rewards), False, {}
 
     # binary goal-conditioned reward function
     # models reward from the transition state' (implicit) -> state
@@ -46,8 +48,8 @@ class OurReacherEnv(ReacherBulletEnv):
         assert goal.shape[0] == 2
 
         to_goal_vec = np.array(state[0] + state[2], state[1] + state[3]) - goal
-        within_goal = all(np.abs(to_goal_vec) < self.epsilon)
-        # print("actual reward: ", np.abs(to_goal_vec), " vs: ", self.epsilon)
+        within_goal = np.sum(to_goal_vec ** 2) < self.epsilon
+
 
         stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
         # maybe make this 1???

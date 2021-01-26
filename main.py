@@ -286,8 +286,8 @@ if __name__ == "__main__":
     parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
 
-    # annealing reacher epsilon: default is a linear 2e-2 -> 2e-2 (aka constant at 2e-2)
-    parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")
+    # annealing reacher epsilon: default is a linear 5e-4 -> 5e-4 (aka constant at 5e-4)
+    parser.add_argument("--reacher_epsilon_bounds", default=[5e-4, 5e-4], nargs=2, type=float, help="upper and lower epsilon bounds")
     parser.add_argument("--decay_type", default="linear", help="'linear' or 'exp' epsilon decay")
     parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
     args = parser.parse_args()
