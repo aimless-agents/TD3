@@ -140,10 +140,13 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         return beta_weights / np.max(beta_weights)
 
 # Calculate the epsilon range given upper+lower bounds, maximum timesteps, decay type.
-# Decay type is either linear or exponential.
+# Possible decay types:
+    # - linear
+    # - exponential
 # Assumes that the env is custom reacher environment, 
 #   where episodes are always 150 timesteps (I think??)
-def epsilon_calc(eps_upper, eps_lower, max_timesteps, decay='linear'):
+def epsilon_calc(eps_upper, eps_lower, max_timesteps, 
+                    decay='linear'):
     num_episodes = int(np.ceil(max_timesteps / 150))     # 150 for custom reacher specifically
     x = np.arange(num_episodes)
     if eps_upper == eps_lower:
@@ -151,5 +154,5 @@ def epsilon_calc(eps_upper, eps_lower, max_timesteps, decay='linear'):
     if decay == 'linear':
         epsilon_step = (eps_upper - eps_lower) / num_episodes
         return np.arange(eps_upper, eps_lower, epsilon_step)
-
-    return eps_upper * (1 - eps_lower) ** x
+    if decay == 'exp':
+        return eps_upper * (1 - eps_lower) ** x

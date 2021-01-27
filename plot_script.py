@@ -15,9 +15,10 @@ parser.add_argument("--prioritized_replay", default=False, action='store_true')	
 parser.add_argument("--use_rank", default=False, action="store_true")               # Include this flag to use rank-based probabilities
 parser.add_argument("--use_hindsight", default=False, action="store_true")          # Include this flag to use HER
 parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
-parser.add_argument("--reacher_epsilon_bounds", default=[2e-2, 2e-2], nargs=2, type=float, help="upper and lower epsilon bounds")
-parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
+# annealing reacher epsilon: default is a linear 5e-4 -> 5e-4 (aka constant at 5e-4)
+parser.add_argument("--reacher_epsilon_bounds", default=[5e-4, 5e-4], nargs=2, type=float, help="upper and lower epsilon bounds")
 parser.add_argument("--decay_type", default="linear", help="'linear' or 'exp' epsilon decay")
+parser.add_argument("--k", default=1, type=int)                             # k number of augmentations for HER
 args, unknown = parser.parse_known_args()
 if unknown:
     print("WARNING: unknown arguments:", unknown)
@@ -39,10 +40,11 @@ if not os.path.exists("./plots"):
     os.makedirs("./plots")
 
 files = []
-for f in glob(f"{sys.path[0]}/final_results/{file_name}*"):
+for f in glob(f"{sys.path[0]}/results/{file_name}*"):
     if f.endswith("npy"):
         files.append(f)
 files.sort(reverse=True)        # most recent -> least recent
+
 file_to_load = files[0]         # just use the most recent one; we can add options later
 outfile_stem = f"./plots/{Path(file_to_load).stem}"      # output file stem, with timestamp
 
@@ -61,6 +63,7 @@ if args.custom_env:
     plt.title(f"{graph_title} Original Rewards")
     plt.savefig(f"{outfile_stem}_original_rewards.png", bbox_inches='tight')
     print("Output to:", f"{outfile_stem}_original_rewards.png")
+    plt.show()
     plt.clf()
 
     # plot epsilon
@@ -79,4 +82,5 @@ plt.ylabel("Returns")
 plt.title(f"{graph_title} Rewards")
 plt.savefig(f"{outfile_stem}.png", bbox_inches='tight')
 print("Output to:", f"{outfile_stem}.png")
-plt.show()
+if not args.custom_env:
+    plt.show()

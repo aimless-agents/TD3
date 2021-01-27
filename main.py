@@ -12,6 +12,7 @@ import utils
 import TD3
 import OurDDPG
 import DDPG
+import plotter
 
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
@@ -250,6 +251,8 @@ def train(config, args):
             np.save(f"./results/{file_name}", evaluations)
             if args.save_model:
                 policy.save(f"./models/{file_name}")
+            if args.plot:
+                plotter.plot(file_name, args.custom_env)
             if args.tune_run:
                 tune.report(episode_reward_mean=evaled_policy[0])
 
@@ -289,7 +292,8 @@ if __name__ == "__main__":
     # annealing reacher epsilon: default is a linear 5e-4 -> 5e-4 (aka constant at 5e-4)
     parser.add_argument("--reacher_epsilon_bounds", default=[5e-4, 5e-4], nargs=2, type=float, help="upper and lower epsilon bounds")
     parser.add_argument("--decay_type", default="linear", help="'linear' or 'exp' epsilon decay")
-    parser.add_argument("--k", default=1, type=int)                                     # k number of augmentations for HER
+    parser.add_argument("--k", default=1, type=int)                             # k number of augmentations for HER
+    parser.add_argument("--plot", default=False, action='store_true')           # include this flag to auto plot after running
     args = parser.parse_args()
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
