@@ -7,6 +7,7 @@ import os
 import sys
 import warnings
 from datetime import datetime
+import mujoco_py
 
 import utils
 import TD3
@@ -20,6 +21,7 @@ import plotter
 #   dictionary containing 'epsilon' to denote epsilon used during training
 def eval_policy(policy, env_name, seed, eval_episodes=10, 
         custom_env_params=None):
+    fetch_reach = "FetchReach" in args.env
     if custom_env_params:
         eval_env = gym.make('OurReacher-v0')
     else:
@@ -35,9 +37,16 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
         state, done = eval_env.reset(), False
         if custom_env_params:
             goal = eval_env.sample_goal_state(sigma=0)
+        elif fetch_reach:
+            goal = state["desired_goal"]
         while not done:
             if policy.use_hindsight:
-                x = np.concatenate([np.array(state), goal])
+                if fetch_reach:
+                    x = np.concatenate([np.array(state["observation"]), goal])
+                else:
+                    x = np.concatenate([np.array(state), goal])
+            elif fetch_reach:
+                x = np.array(state["observation"])
             else:
                 x = np.array(state)
             action = policy.select_action(x)
@@ -77,6 +86,8 @@ def train(config, args):
     import pybulletgym
     warnings.filterwarnings("ignore")
     eps_bounds = args.reacher_epsilon_bounds      # just aliasing with shorter variable name
+    fetch_reach = "FetchReach" in args.env
+    
     if args.custom_env:
         gym.envs.register(
             id='OurReacher-v0',
@@ -96,6 +107,7 @@ def train(config, args):
     else:
         env = gym.make(args.env)
 
+
     if args.tune_run:
         if args.prioritized_replay:
             args.alpha = float(config["alpha"])
@@ -108,13 +120,18 @@ def train(config, args):
     env.seed(args.seed)
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    
-    state_dim = env.observation_space.shape[0]
+    if fetch_reach:
+        state_dim = env.reset()["observation"].shape[0]
+    else:
+        state_dim = env.observation_space.shape[0]
     if args.use_hindsight:          # include both current state and goal state
         if args.custom_env:
             state_dim += 2          # reacher nonsense; goal = (x, y)
+        elif fetch_reach:
+            state_dim += 3          # include fetchreach goal state (x,y,z position)
         else:
             state_dim *= 2
+
     action_dim = env.action_space.shape[0] 
     max_action = float(env.action_space.high[0])
 
@@ -167,7 +184,7 @@ def train(config, args):
     # Evaluate untrained policy
     custom_env_params = {'epsilon': env.epsilon} if args.custom_env else None
     evaluations = [eval_policy(policy, args.env, args.seed, custom_env_params=custom_env_params)]
-
+ 
     state, done = env.reset(), False
 
     original_episode_reward = 0
@@ -181,8 +198,18 @@ def train(config, args):
         
         episode_timesteps += 1
         if args.use_hindsight:
-            goal = env.sample_goal_state()
-        x = np.concatenate([np.array(state), goal]) if args.use_hindsight else np.array(state)
+            if fetch_reach:
+                goal = state["desired_goal"]
+                x = np.concatenate([np.array(state["observation"]), goal])
+            else:
+                goal = env.sample_goal_state()
+                x = np.concatenate([np.array(state), goal])
+
+        elif fetch_reach:
+            x = np.array(state["observation"])
+        else:
+            x = np.array(state)
+        
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
@@ -193,20 +220,25 @@ def train(config, args):
             ).clip(-max_action, max_action)
 
         # Perform action
-        if args.use_hindsight:
-            env.set_goal(goal)
         next_state, reward, done, _ = env.step(action)
         done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
         if args.use_hindsight:
-            next_x = np.concatenate([np.array(next_state), goal])
+            if fetch_reach:
+                goal = state["desired_goal"]
+                next_x = np.concatenate([np.array(next_state["observation"]), goal])
+            else:
+                env.set_goal(goal)
+                next_x = np.concatenate([np.array(next_state), goal])
+        elif fetch_reach:
+            next_x = np.array(next_state["observation"])
         else:
-            next_x = np.array(next_state)
+            next_x = next_state
 
         # Store data in replay buffer
         replay_buffer.add(x, action, next_x, reward, done_bool)
 
-        trajectory.append((state, action, np.array(next_state), reward, done_bool))
+        trajectory.append((state, action, next_state, reward, done_bool))
 
         state = next_state
         episode_reward += reward
@@ -224,10 +256,19 @@ def train(config, args):
                         old_state, old_action, old_next_state, _, old_done_bool = trajectory[i]
                         idx = np.random.choice(np.arange(i+1, len(trajectory)))
                         ng, _, _, _, _ = trajectory[idx]
-                        new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
-                        x = np.concatenate([old_state, new_goal])
-                        next_x = np.concatenate([old_next_state, new_goal])
-                        replay_buffer.add(x, old_action, next_x, env.goal_cond_reward(old_next_state, new_goal), old_done_bool)
+                        if fetch_reach:
+                            new_goal = ng["desired_goal"]
+                            x = np.concatenate([np.array(old_state["observation"]), new_goal])
+                            next_x = np.concatenate([np.array(old_next_state["observation"]), new_goal])
+                            # TODO: should this be the gc reward?
+                            gc_reward = env.compute_reward(old_next_state["achieved_goal"], new_goal, {})
+                        else:
+                            new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
+                            x = np.concatenate([old_state, new_goal])
+                            next_x = np.concatenate([old_next_state, new_goal])
+                            gc_reward = env.goal_cond_reward(old_next_state, new_goal)
+                        
+                        replay_buffer.add(x, old_action, next_x, gc_reward, old_done_bool)
             # +1 to account for 0 indexing. +0 on ep_timesteps since it will increment +1 even if done=True
             print(
                 f"Total T: {t+1} Episode Num: {episode_num+1} Episode T: {episode_timesteps} Reward: {episode_reward:.3f} Original Reward: {original_episode_reward:.3f}")
