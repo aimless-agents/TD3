@@ -112,6 +112,8 @@ def train(config, args):
         if args.prioritized_replay:
             args.alpha = float(config["alpha"])
             args.beta = float(config["beta"])
+            args.discount = float(config.get("discount", args.discount))
+            args.tau = float(config.get("tau", args.tau))
         else:
             args.discount = float(config.get("discount", args.discount))
             args.tau = float(config.get("tau", args.tau))
@@ -339,7 +341,6 @@ if __name__ == "__main__":
     print("---------------------------------------")
     print(f"Policy: {args.policy}, Env: {'CustomReacher' if args.custom_env else args.env}, Seed: {args.seed}")
     print("---------------------------------------")
-
     if args.tune_run:
         import ray 
         from ray import tune
@@ -354,6 +355,8 @@ if __name__ == "__main__":
             config = {
                 "beta": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.4, 0.5]),
                 "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6])
+                "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
+                "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
             }
         else: 
             config = {
