@@ -92,6 +92,8 @@ def train(config, args):
             epsilon = float(config['epsilon']) if args.tune_run else 0.02
             a, b = epsilon, epsilon
         epsilons = utils.epsilon_calc(a, b, args.max_timesteps, args.decay_type)
+        # TODO: remove this
+        # epsilons[int(5e5):] = 1e-3
         env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
     else:
         env = gym.make(args.env)
