@@ -36,7 +36,6 @@ class OurReacherEnv(ReacherBulletEnv):
                 - 0.01 * (np.abs(a[0]) + np.abs(a[1]))  # stall torque require some energy
         )
         electricity_exceeded = electricity_cost > 0.01
-        print(electricity_cost)
         stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
 
         # self.rewards = [0.1 if within_goal and stuck_joint_cost == 0 else 0]
