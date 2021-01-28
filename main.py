@@ -171,6 +171,18 @@ def train(config, args):
         f"k{args.k}",
         datetime.now().strftime('%Y%m%d%H%M')
     ]
+    if args.tune_run:
+        # fudgy: assumes tune_run for non-HER experiments
+        exp_descriptors = [
+            args.policy, 'CustomReacher' if args.custom_env else args.env,
+            f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
+            f"tau{args.tau}", f"discount{args.discount}",
+            f"alpha{args.alpha}" if args.prioritized_replay else '',
+            f"beta{args.beta}" if args.prioritized_replay else '',
+            f"k{args.k}",
+            datetime.now().strftime('%Y%m%d%H%M')
+        ]
+
     exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
     file_name = "_".join(exp_descriptors)
 
@@ -356,7 +368,7 @@ if __name__ == "__main__":
         if args.prioritized_replay:
             config = {
                 "beta": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.4, 0.5]),
-                "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6])
+                "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
                 "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
                 "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
             }
