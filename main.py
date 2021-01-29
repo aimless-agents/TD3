@@ -87,6 +87,19 @@ def train(config, args):
     warnings.filterwarnings("ignore")
     eps_bounds = args.reacher_epsilon_bounds      # just aliasing with shorter variable name
     fetch_reach = "FetchReach" in args.env
+
+    if args.tune_run:
+        if args.prioritized_replay:
+            args.alpha = float(config["alpha"])
+            args.beta = float(config["beta"])
+            args.discount = float(config.get("discount", args.discount))
+            args.tau = float(config.get("tau", args.tau))
+        elif args.custom_env and args.use_hindsight:
+            eps_bounds = [float(config["epsilons"][0]), float(config["epsilons"][1])]
+            args.seed = float(config["seed"])
+        else:
+            args.discount = float(config.get("discount", args.discount))
+            args.tau = float(config.get("tau", args.tau))
     
     if args.custom_env:
         gym.envs.register(
@@ -96,11 +109,11 @@ def train(config, args):
             reward_threshold=100.0,
         )
 
+
         # retrieve epsilon range
         if eps_bounds:
             [a, b] = eps_bounds
         else:
-            epsilon = float(config['epsilon']) if args.tune_run else 0.02
             a, b = epsilon, epsilon
         epsilons = utils.epsilon_calc(a, b, args.max_timesteps, args.decay_type)
         # TODO: remove this
@@ -108,17 +121,6 @@ def train(config, args):
         env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
     else:
         env = gym.make(args.env)
-
-
-    if args.tune_run:
-        if args.prioritized_replay:
-            args.alpha = float(config["alpha"])
-            args.beta = float(config["beta"])
-            args.discount = float(config.get("discount", args.discount))
-            args.tau = float(config.get("tau", args.tau))
-        else:
-            args.discount = float(config.get("discount", args.discount))
-            args.tau = float(config.get("tau", args.tau))
 
     # Set seeds
     env.seed(args.seed)
@@ -372,16 +374,31 @@ if __name__ == "__main__":
                 "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
                 "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
             }
+        elif args.use_hindsight:
+            eps_ranges = [
+                [7e-3, 1e-3],
+                [7e-3, 1e-4],
+                [7e-3, 5e-5],
+                [7e-3, 1e-5],
+                [5e-3, 1e-3],
+                [5e-3, 1e-4],
+                [5e-3, 5e-5],
+                [5e-3, 1e-5],
+                [1e-3, 1e-4],
+                [1e-3, 5e-5],
+                [1e-3, 1e-5]
+            ]
+            config = {
+                "epsilons": tune.grid_search(eps_ranges),
+                "seed": tune.grid_search([0, 2, 4, 8, 16])
+            }
         else: 
             config = {
                 "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
                 "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
             }
 
-        if args.use_hindsight:
-            config = {
-                "epsilon": tune.grid_search(list(np.arange(2e-2, 5.5e-2, 5e-3)))
-            }
+        
 
     kwargs = {}
 
