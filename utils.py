@@ -153,6 +153,6 @@ def epsilon_calc(eps_upper, eps_lower, max_timesteps,
         return np.full(num_episodes, eps_upper)
     if decay == 'linear':
         epsilon_step = (eps_upper - eps_lower) / num_episodes
-        return np.arange(eps_upper, eps_lower, epsilon_step)
+        return np.arange(eps_upper, eps_lower, -epsilon_step)
     if decay == 'exp':
         return eps_upper * (1 - eps_lower) ** x
