@@ -51,8 +51,8 @@ class ReplayBuffer(object):
                 future_state, _, _, _, _ = trajectory[idx]
                 x, next_x, gc_reward = self.updated_hindsight_experience(state, next_state, future_state, env, fetch_reach)
             else:
-                x = np.concatenate([np.array(state), goal])
-                next_x = np.concatenate([np.array(next_state), goal])
+                x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])
+                next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])
             self.add(x, action, next_x, gc_reward, done_bool)
 
     def updated_hindsight_experience(self, state, next_state, future_state, env, fetch_reach): 

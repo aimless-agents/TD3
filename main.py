@@ -38,8 +38,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
         state, done = eval_env.reset(), False
         
         while not done:
-            if policy.use_hindsight:
-                x, goal = utils_object.compute_x_goal(state, eval_env, sigma=0)
+            x, goal = utils_object.compute_x_goal(state, eval_env, sigma=0)
             action = policy.select_action(x)
             if utils_object.args.custom_env:
               eval_env.set_goal(goal)
