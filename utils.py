@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from numba import jit
 import matplotlib.pyplot as plt
+from ray import tune
 
 
 class ReplayBuffer(object):
@@ -39,6 +40,33 @@ class ReplayBuffer(object):
             torch.FloatTensor(self.reward[ind]).to(self.device),
             torch.FloatTensor(self.not_done[ind]).to(self.device)
         )
+    
+    def add_hindsight(self, trajectory, goal, env, k=4, fetch_reach=False):
+        p_hindsight = 1.0 - (1.0 / (1.0 + k))
+        hindsight_er = np.random.uniform(size=(len(trajectory) - 1)) < p_hindsight
+        for i in range(len(trajectory) - 1):
+            state, action, next_state, gc_reward, done_bool = trajectory[i]
+            if hindsight_er[i]:
+                idx = np.random.choice(np.arange(i + 1, len(trajectory)))
+                future_state, _, _, _, _ = trajectory[idx]
+                x, next_x, gc_reward = self.updated_hindsight_experience(state, next_state, future_state, env, fetch_reach)
+            else:
+                x = np.concatenate([np.array(state), goal])
+                next_x = np.concatenate([np.array(next_state), goal])
+            self.add(x, action, next_x, gc_reward, done_bool)
+
+    def updated_hindsight_experience(self, state, next_state, future_state, env, fetch_reach): 
+        if fetch_reach:
+            new_goal = future_state["desired_goal"]
+            x = np.concatenate([np.array(state["observation"]), new_goal])
+            next_x = np.concatenate([np.array(next_state["observation"]), new_goal])
+            gc_reward = env.compute_reward(next_state["achieved_goal"], new_goal, {})
+        else:
+            new_goal = np.array([future_state[0] + future_state[2], future_state[1] + future_state[3]])
+            x = np.concatenate([state, new_goal])
+            next_x = np.concatenate([next_state, new_goal])
+            gc_reward = env.goal_cond_reward(next_state, new_goal) 
+        return x, next_x, gc_reward  
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
@@ -156,3 +184,58 @@ def epsilon_calc(eps_upper, eps_lower, max_timesteps,
         return np.arange(eps_upper, eps_lower, -epsilon_step)
     if decay == 'exp':
         return eps_upper * (1 - eps_lower) ** x
+
+def get_train_configuration(args):
+    config = {}
+    if args.tune_run:
+        if args.prioritized_replay:
+            config = {
+                "beta": tune.grid_search([0.0, 0.1, 0.2, 0.3, 0.4, 0.5]),
+                "alpha": tune.grid_search([0.3, 0.4, 0.5, 0.6]),
+                "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
+                "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
+            }
+        elif args.use_hindsight:
+            eps_ranges = [
+                [7e-3, 1e-3],
+                [7e-3, 1e-4],
+                [7e-3, 5e-5],
+                [7e-3, 1e-5],
+                [5e-3, 1e-3],
+                [5e-3, 1e-4],
+                [5e-3, 5e-5],
+                [5e-3, 1e-5],
+                [1e-3, 1e-4],
+                [1e-3, 5e-5],
+                [1e-3, 1e-5]
+            ]
+            config = {
+                "epsilons": tune.grid_search(eps_ranges),
+                "seed": tune.grid_search([0, 2, 4, 8, 16])
+            }
+        else: 
+            config = {
+                "discount": tune.grid_search([0.995, 0.996, 0.997, 0.998, 0.999]),
+                "tau": tune.grid_search([1e-5, 5e-4, 1e-4])
+            }
+    return config
+
+class GeneralUtils():
+    def __init__(self, args):
+        self.args = args
+        self.fetch_reach = 'FetchReach' in args.env
+
+    def compute_x_goal(self, state, env, sigma=1e-3):
+        goal = None
+        if self.args.use_hindsight:
+            if self.fetch_reach:
+                goal = state["desired_goal"]
+                x = np.concatenate([np.array(state["observation"]), goal])
+            else:
+                goal = env.sample_goal_state(sigma=sigma)
+                x = np.concatenate([np.array(state), goal])
+        elif self.fetch_reach:
+            x = np.array(state["observation"])
+        else:
+            x = np.array(state)
+        return x, goal
