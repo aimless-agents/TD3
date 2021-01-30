@@ -96,7 +96,7 @@ def train(config, args):
             args.tau = float(config.get("tau", args.tau))
         elif args.custom_env and args.use_hindsight:
             eps_bounds = [float(config["epsilons"][0]), float(config["epsilons"][1])]
-            args.seed = float(config["seed"])
+            args.seed = int(config["seed"])
         else:
             args.discount = float(config.get("discount", args.discount))
             args.tau = float(config.get("tau", args.tau))
