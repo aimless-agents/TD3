@@ -42,18 +42,40 @@ class ReplayBuffer(object):
         )
     
     def add_hindsight(self, trajectory, goal, env, k=4, fetch_reach=False):
-        p_hindsight = 1.0 - (1.0 / (1.0 + k))
-        hindsight_er = np.random.uniform(size=(len(trajectory) - 1)) < p_hindsight
-        for i in range(len(trajectory) - 1):
-            state, action, next_state, gc_reward, done_bool = trajectory[i]
-            if hindsight_er[i]:
-                idx = np.random.choice(np.arange(i + 1, len(trajectory)))
-                future_state, _, _, _, _ = trajectory[idx]
-                x, next_x, gc_reward = self.updated_hindsight_experience(state, next_state, future_state, env, fetch_reach)
-            else:
-                x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])
-                next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])
-            self.add(x, action, next_x, gc_reward, done_bool)
+        # p_hindsight = 1.0 - (1.0 / (1.0 + k))
+        # hindsight_er = np.random.uniform(size=(len(trajectory) - 1)) < p_hindsight
+        # for i in range(len(trajectory) - 1):
+        #     state, action, next_state, gc_reward, done_bool = trajectory[i]
+        #     if hindsight_er[i]:
+        #         idx = np.random.choice(np.arange(i + 1, len(trajectory)))
+        #         future_state, _, _, _, _ = trajectory[idx]
+        #         x, next_x, gc_reward = self.updated_hindsight_experience(state, next_state, future_state, env, fetch_reach)
+        #     else:
+        #         x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])
+        #         next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])
+        #     self.add(x, action, next_x, gc_reward, done_bool)
+        for _ in range(k): # factor to increase buffer by
+            for i in range(len(trajectory)):
+                old_state, old_action, old_next_state, reward, old_done_bool = trajectory[i]
+                if i < len(trajectory) - 1:
+                    idx = np.random.choice(np.arange(i+1, len(trajectory)))
+                    ng, _, _, _, _ = trajectory[idx]
+                    if fetch_reach:
+                        new_goal = ng["desired_goal"]
+                        x = np.concatenate([np.array(old_state["observation"]), new_goal])
+                        next_x = np.concatenate([np.array(old_next_state["observation"]), new_goal])
+                        gc_reward = env.compute_reward(old_next_state["achieved_goal"], new_goal, {})
+                    else:
+                        new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
+                        x = np.concatenate([old_state, new_goal])
+                        next_x = np.concatenate([old_next_state, new_goal])
+                        gc_reward = env.goal_cond_reward(old_next_state, new_goal)
+                    
+                        self.add(x, old_action, next_x, gc_reward, old_done_bool)
+
+                x = np.concatenate([np.array(old_state["observation"]) if fetch_reach else np.array(old_state), goal])
+                next_x = np.concatenate([np.array(old_next_state["observation"]) if fetch_reach else np.array(old_next_state), goal])
+                self.add(x, old_action, next_x, reward, old_done_bool)
 
     def updated_hindsight_experience(self, state, next_state, future_state, env, fetch_reach): 
         if fetch_reach:
