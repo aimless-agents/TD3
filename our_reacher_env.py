@@ -39,7 +39,7 @@ class OurReacherEnv(ReacherBulletEnv):
         stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
 
         # self.rewards = [0.1 if within_goal and stuck_joint_cost == 0 else 0]
-        self.rewards = [0.1 if within_goal and stuck_joint_cost == 0 and not electricity_exceeded else 0]
+        self.rewards = [0 if within_goal and stuck_joint_cost == 0 and not electricity_exceeded else -1]
         self.original_rewards = sum([float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)])
         self.HUD(state, a, False)
         return state, sum(self.rewards), False, {}
@@ -55,7 +55,7 @@ class OurReacherEnv(ReacherBulletEnv):
 
         stuck_joint_cost = -0.1 if np.abs(np.abs(self.robot.gamma) - 1) < 0.01 else 0.0
         # maybe make this 1???
-        return 0.1 if within_goal and stuck_joint_cost == 0 else 0
+        return 0 if within_goal and stuck_joint_cost == 0 else -1
 
     # pass in sigma=0 to get the original target goal state
     def sample_goal_state(self, sigma=1e-3):
