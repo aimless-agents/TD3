@@ -49,7 +49,7 @@ class OurReacherEnv(ReacherBulletEnv):
         self.potential = self.robot.calc_potential()
         self.original_rewards = sum([float(self.potential - potential_old), float(electricity_cost), float(stuck_joint_cost)])
         # maybe make this 1???
-        return 0 if within_goal and stuck_joint_cost == 0 and not electricity_exceeded else -5
+        return 0 if within_goal and stuck_joint_cost == 0 and not electricity_exceeded else -1
 
     # pass in sigma=0 to get the original target goal state
     def sample_goal_state(self, sigma=1e-3):

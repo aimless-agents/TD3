@@ -29,6 +29,7 @@ if unknown:
     print("WARNING: unknown arguments:", unknown)
 
 eps_bounds = args.reacher_epsilon_bounds
+fetch_reach = "FetchReach" in args.env
 exp_descriptors = [
     args.policy, 'CustomReacher' if args.custom_env else args.env,
     f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
@@ -38,7 +39,6 @@ exp_descriptors = [
 ]
 exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
 file_name = "_".join(exp_descriptors)       # file name root (minus timestamp)
-graph_title = " ".join(exp_descriptors)
 
 if args.custom_env:
     gym.envs.register(
@@ -52,9 +52,16 @@ if args.custom_env:
 else:
     env = gym.make(args.env)
 
-state_dim = env.observation_space.shape[0]
+if fetch_reach:
+    if args.use_hindsight:
+        state_dim = env.observation_space["observation"].shape[0] + 3
+    else:
+        state_dim = env.observation_space["observation"].shape[0]
+else:
+    state_dim = env.observation_space.shape[0]
 if args.custom_env:
     state_dim += 2
+
 action_dim = env.action_space.shape[0] 
 max_action = float(env.action_space.high[0])
 
@@ -83,6 +90,12 @@ for _ in range(1000):
     if args.custom_env:
         goal = env.sample_goal_state(sigma=0)
         state = np.concatenate([np.array(state), goal])
+    elif fetch_reach:
+        if args.use_hindsight:
+            goal = state["desired_goal"]
+        else:
+            goal = np.array([])
+        state = np.concatenate([np.array(state["observation"]), goal])
     else:
         state = np.array(state)
     action = select_action(policy, state)
@@ -91,3 +104,5 @@ for _ in range(1000):
     if done:
         state, done = env.reset(), False
 env.close()
+
+print(f"Copy paste this command into terminal to create the output mp4: ./concat_vids.sh \"{file_name}\"")
