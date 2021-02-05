@@ -82,10 +82,13 @@ actor_to_load = os.path.join(os.path.dirname(os.path.realpath(__file__)), actor_
 policy = Actor(state_dim, action_dim, max_action).to(device)
 policy.load_state_dict(torch.load(actor_to_load))
 
+achieved_goal = 0
+total_goal = 0
+
 env = wrappers.Monitor(env, f'./recordings/{file_name}/', force=True, video_callable=lambda episode_id: True)
 # env.render()
 state, done = env.reset(), False
-for _ in range(1000):
+for _ in range(5000):
     # env.render()
     if args.custom_env:
         goal = env.sample_goal_state(sigma=0)
@@ -102,7 +105,17 @@ for _ in range(1000):
     state, reward, done, _ = env.step(action)
 
     if done:
+        if args.custom_env:
+            achieved_goal += 1 if env.within_goal(state) else 0
+            total_goal += 1
+        elif fetch_reach:
+            achieved_goal += 1 if np.sum((state["achieved_goal"] - state["desired_goal"]) ** 2) < 1e-3 else 0
+            total_goal += 1
         state, done = env.reset(), False
-env.close()
 
-print(f"Copy paste this command into terminal to create the output mp4: ./concat_vids.sh \"{file_name}\"")
+print(f"\nCopy paste this command into terminal to create the output mp4: ./concat_vids.sh \"{file_name}\"")
+
+if args.custom_env or fetch_reach:
+    print(f"\n Percent within goal: {float(achieved_goal) / float(total_goal)}")
+
+env.close()

@@ -54,3 +54,6 @@ class OurReacherEnv(ReacherBulletEnv):
     # pass in sigma=0 to get the original target goal state
     def sample_goal_state(self, sigma=1e-3):
         return np.random.normal(self.robot.target.pose().xyz()[:2], sigma)
+
+    def within_goal(self, state, eps=1e-3):
+        return np.sum(([state[0] + state[2], state[1] + state[3]] - self.robot.target.pose().xyz()[:2]) ** 2) < eps

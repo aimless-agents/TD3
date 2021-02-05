@@ -15,8 +15,8 @@ class OurReacher(Reacher):
             self.fingertip.pose().xyz()) - \
                 np.array([g[0], g[1], 0.01])
         return np.array([
-            target_x,
-            target_y,
+            g[0],
+            g[1],
             self.to_target_vec[0],
             self.to_target_vec[1],
             np.cos(theta),
