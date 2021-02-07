@@ -56,7 +56,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
     std_original_reward = np.std(original_rewards)
 
     print("---------------------------------------")
-    print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f} with original reward as {avg_original_reward:.3f}")
+    print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f} from {rewards} with original reward as {avg_original_reward:.3f}")
     print("---------------------------------------")
     if utils_object.args.custom_env:
         return [avg_reward, std_reward, avg_original_reward, std_original_reward]
@@ -214,7 +214,7 @@ def train(config, args):
                 goal = state["desired_goal"]
                 next_x = np.concatenate([np.array(next_state["observation"]), goal])
             else:
-                env.set_goal(goal)
+                # env.set_goal(goal)
                 next_x = np.concatenate([np.array(next_state), goal])
         elif utils_object.fetch_reach:
             next_x = np.array(next_state["observation"])

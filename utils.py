@@ -41,41 +41,53 @@ class ReplayBuffer(object):
         )
     
     def add_hindsight(self, trajectory, goal, env, k=4, fetch_reach=False):
-        for _ in range(k): # factor to increase buffer by
-            for i in range(len(trajectory)):
-                old_state, old_action, old_next_state, reward, old_done_bool = trajectory[i]
-                if i < len(trajectory) - 1:
-                    idx = np.random.choice(np.arange(i+1, len(trajectory)))
-                    ng, _, _, _, _ = trajectory[idx]
-                    if fetch_reach:
-                        new_goal = ng["desired_goal"]
-                        x = np.concatenate([np.array(old_state["observation"]), new_goal])
-                        next_x = np.concatenate([np.array(old_next_state["observation"]), new_goal])
-                        gc_reward = env.compute_reward(old_next_state["achieved_goal"], new_goal, {})
-                    else:
-                        new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
-                        x = np.concatenate([old_state, new_goal])
-                        next_x = np.concatenate([old_next_state, new_goal])
-                        gc_reward = env.goal_cond_reward(old_action, old_next_state, new_goal)
+        p_hindsight = 1.0 - (1.0 / (1.0 + k))	        # p_hindsight = 1.0 - (1.0 / (1.0 + k))
+        hindsight_er = np.random.uniform(size=(len(trajectory) - 1)) < p_hindsight	        # hindsight_er = np.random.uniform(size=(len(trajectory) - 1)) < p_hindsight
+        for i in range(len(trajectory) - 1):	        # for i in range(len(trajectory) - 1):
+            state, action, next_state, gc_reward, done_bool = trajectory[i]	        #     state, action, next_state, gc_reward, done_bool = trajectory[i]
+            if hindsight_er[i]:	        #     if hindsight_er[i]:
+                idx = np.random.choice(np.arange(i + 1, len(trajectory)))	        #         idx = np.random.choice(np.arange(i + 1, len(trajectory)))
+                future_state, _, _, _, _ = trajectory[idx]	        #         future_state, _, _, _, _ = trajectory[idx]
+                x, next_x, gc_reward = self.updated_hindsight_experience(state, action, next_state, future_state, env, fetch_reach)	        #         x, next_x, gc_reward = self.updated_hindsight_experience(state, next_state, future_state, env, fetch_reach)
+            else:	        #     else:
+                x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])	        #         x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])
+                next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])	        #         next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])
+            self.add(x, action, next_x, gc_reward, done_bool)
+        # for _ in range(k): # factor to increase buffer by
+        #     for i in range(len(trajectory)):
+        #         old_state, old_action, old_next_state, reward, old_done_bool = trajectory[i]
+        #         if i < len(trajectory) - 1:
+        #             idx = np.random.choice(np.arange(i+1, len(trajectory)))
+        #             ng, _, _, _, _ = trajectory[idx]
+        #             if fetch_reach:
+        #                 new_goal = ng["desired_goal"]
+        #                 x = np.concatenate([np.array(old_state["observation"]), new_goal])
+        #                 next_x = np.concatenate([np.array(old_next_state["observation"]), new_goal])
+        #                 gc_reward = env.compute_reward(old_next_state["achieved_goal"], new_goal, {})
+        #             else:
+        #                 new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
+        #                 x = np.concatenate([old_state, new_goal])
+        #                 next_x = np.concatenate([old_next_state, new_goal])
+        #                 gc_reward = env.goal_cond_reward(old_action, old_next_state, new_goal)
                     
-                        self.add(x, old_action, next_x, gc_reward, old_done_bool)
+        #                 self.add(x, old_action, next_x, gc_reward, old_done_bool)
 
-                x = np.concatenate([np.array(old_state["observation"]) if fetch_reach else np.array(old_state), goal])
-                next_x = np.concatenate([np.array(old_next_state["observation"]) if fetch_reach else np.array(old_next_state), goal])
-                self.add(x, old_action, next_x, reward, old_done_bool)
+        #         x = np.concatenate([np.array(old_state["observation"]) if fetch_reach else np.array(old_state), goal])
+        #         next_x = np.concatenate([np.array(old_next_state["observation"]) if fetch_reach else np.array(old_next_state), goal])
+        #         self.add(x, old_action, next_x, reward, old_done_bool)
 
-    # will need to refac if choose to use this again
-    def updated_hindsight_experience(self, state, next_state, future_state, env, fetch_reach): 
+    # refactored
+    def updated_hindsight_experience(self, state, action, next_state, future_state, env, fetch_reach): 
         if fetch_reach:
             new_goal = future_state["desired_goal"]
             x = np.concatenate([np.array(state["observation"]), new_goal])
             next_x = np.concatenate([np.array(next_state["observation"]), new_goal])
             gc_reward = env.compute_reward(next_state["achieved_goal"], new_goal, {})
         else:
-            new_goal = np.array([future_state[0] + future_state[2], future_state[1] + future_state[3]])
+            new_goal = env.get_fingertip_from_state(future_state)[:2]
             x = np.concatenate([state, new_goal])
             next_x = np.concatenate([next_state, new_goal])
-            gc_reward = env.goal_cond_reward(next_state, new_goal) 
+            gc_reward = env.goal_cond_reward(action, next_state, new_goal) 
         return x, next_x, gc_reward  
 
 
@@ -244,6 +256,7 @@ class GeneralUtils():
                 x = np.concatenate([np.array(state["observation"]), goal])
             else:
                 goal = env.sample_goal_state(sigma=sigma)
+                env.set_goal(goal)
                 x = np.concatenate([np.array(state), goal])
         elif self.fetch_reach:
             x = np.array(state["observation"])
