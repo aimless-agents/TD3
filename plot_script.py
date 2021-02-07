@@ -11,8 +11,9 @@ from pathlib import Path
 
 args = parse_our_args()
 
-# SET COLORS HERE - cycles through these in order
-mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["#41bbd9", "#99c24d"]) 
+colors = [
+    "#41bbd9", "#99c24d"
+]
 
 if args.policy:
     file_name = args.policy
@@ -49,9 +50,9 @@ results = np.load(file_to_load)
 x = np.arange(0, len(results) * eval_freq, eval_freq)
 if args.custom_env:
     # plot original reward curve
-    plt.fill_between(x, results[:, 2] - results[:, 3], results[:, 2] + results[:, 3], color="#41bbd988")
-    plt.plot(x, results[:, 2])
-    plt.plot(x, [18] * len(x))
+    plt.fill_between(x, results[:, 2] - results[:, 3], results[:, 2] + results[:, 3], color=colors[0]+"88")
+    plt.plot(x, results[:, 2], color=colors[0])
+    plt.plot(x, [18] * len(x), color=colors[1])
     plt.xlabel("Timesteps")
     plt.ylabel("Original Returns")
     if not args.no_title:
@@ -61,8 +62,12 @@ if args.custom_env:
     # plt.show()
     plt.clf()
 
-plt.fill_between(x, results[:, 0] - results[:, 1], results[:, 0] + results[:, 1], alpha=0.5)
-plt.plot(x, results[:, 0])
+plt.fill_between(x, results[:, 0] - results[:, 1], results[:, 0] + results[:, 1], color=colors[0]+"88")
+plt.plot(x, results[:, 0], color=colors[0])
+
+if "FetchReach" in args.env:
+    plt.plot(x, [0] * len(x), color=colors[1])
+    
 plt.xlabel("Timesteps")
 plt.ylabel("Returns")
 if not args.no_title:
