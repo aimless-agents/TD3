@@ -21,7 +21,7 @@ parser.add_argument("--use_rank", default=False, action="store_true")           
 parser.add_argument("--use_hindsight", default=False, action="store_true")          # Include this flag to use HER
 parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
 # annealing reacher epsilon: default is a linear 5e-4 -> 5e-4 (aka constant at 5e-4)
-parser.add_argument("--reacher_epsilon_bounds", default=[5e-4, 5e-4], nargs=2, type=float, help="upper and lower epsilon bounds")
+parser.add_argument("--reacher_epsilon_bounds", default=[5e-3, 5e-3], nargs=2, type=float, help="upper and lower epsilon bounds")
 parser.add_argument("--decay_type", default="linear", help="'linear' or 'exp' epsilon decay")
 parser.add_argument("--k", default=1, type=int)                             # k number of augmentations for HER
 args, unknown = parser.parse_known_args()
@@ -59,7 +59,7 @@ if fetch_reach:
         state_dim = env.observation_space["observation"].shape[0]
 else:
     state_dim = env.observation_space.shape[0]
-if args.custom_env:
+if args.custom_env and args.use_hindsight:
     state_dim += 2
 
 action_dim = env.action_space.shape[0] 
@@ -88,7 +88,7 @@ total_goal = 0
 env = wrappers.Monitor(env, f'./recordings/{file_name}/', force=True, video_callable=lambda episode_id: True)
 # env.render()
 state, done = env.reset(), False
-for _ in range(5000):
+for _ in range(1000):
     # env.render()
     if args.custom_env:
         goal = env.sample_goal_state(sigma=0)
@@ -106,7 +106,7 @@ for _ in range(5000):
 
     if done:
         if args.custom_env:
-            achieved_goal += 1 if env.within_goal(state) else 0
+            achieved_goal += 1 if env.within_goal(state, eps=5e-3) else 0
             total_goal += 1
         elif fetch_reach:
             achieved_goal += 1 if np.sum((state["achieved_goal"] - state["desired_goal"]) ** 2) < 1e-3 else 0
