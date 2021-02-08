@@ -91,13 +91,16 @@ def train(config, args):
         gym.envs.register(
             id='OurReacher-v0',
             entry_point='our_reacher_env:OurReacherEnv',
-            max_episode_steps=150,
+            max_episode_steps=50,
             reward_threshold=100.0,
         )
 
+        # this is assuming we only use epsilon for custom env or fetch reach, where episode tsteps is 50 !!!!
+        max_episode_steps = 50
+
         # retrieve epsilon range
         [a, b] = eps_bounds
-        epsilons = utils.epsilon_calc(a, b, args.max_timesteps, args.decay_type)
+        epsilons = utils_object.epsilon_calc(a, b, max_episode_steps)
         env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
     else:
         env = gym.make(args.env)

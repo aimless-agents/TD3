@@ -27,24 +27,27 @@ parser.add_argument("--k", default=1, type=int)                             # k 
 args, unknown = parser.parse_known_args()
 if unknown:
     print("WARNING: unknown arguments:", unknown)
-
 eps_bounds = args.reacher_epsilon_bounds
 fetch_reach = "FetchReach" in args.env
-exp_descriptors = [
-    args.policy, 'CustomReacher' if args.custom_env else args.env,
-    f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
-    'HER' if args.use_hindsight else '',
-    f"{args.decay_type}decay-eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
-    f"k{args.k}",
-]
-exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
-file_name = "_".join(exp_descriptors)       # file name root (minus timestamp)
+if args.policy:
+    file_name = args.policy
+else:
+    
+    exp_descriptors = [
+        args.policy, 'CustomReacher' if args.custom_env else args.env,
+        f"{'rank' if args.use_rank else 'proportional'}PER" if args.prioritized_replay else '', 
+        'HER' if args.use_hindsight else '',
+        f"{args.decay_type}decay-eps{f'{eps_bounds[0]}-{eps_bounds[1]}' if eps_bounds[0] != eps_bounds[1] else f'{eps_bounds[0]}'}" if args.custom_env else "",
+        f"k{args.k}",
+    ]
+    exp_descriptors = [x for x in exp_descriptors if len(x) > 0]
+    file_name = "_".join(exp_descriptors)       # file name root (minus timestamp)
 
 if args.custom_env:
     gym.envs.register(
         id='OurReacher-v0',
         entry_point='our_reacher_env:OurReacherEnv',
-        max_episode_steps=150,
+        max_episode_steps=50,
         reward_threshold=100.0,
     )
     epsilon = eps_bounds[1]     # use latest epsilon
@@ -88,11 +91,15 @@ total_goal = 0
 env = wrappers.Monitor(env, f'./recordings/{file_name}/', force=True, video_callable=lambda episode_id: True)
 # env.render()
 state, done = env.reset(), False
+
 for _ in range(1000):
     # env.render()
     if args.custom_env:
         goal = env.sample_goal_state(sigma=0)
-        state = np.concatenate([np.array(state), goal])
+        if args.use_hindsight:
+            state = np.concatenate([np.array(state), goal])
+        else:
+            goal = np.array([])
     elif fetch_reach:
         if args.use_hindsight:
             goal = state["desired_goal"]
@@ -106,10 +113,10 @@ for _ in range(1000):
 
     if done:
         if args.custom_env:
-            achieved_goal += 1 if env.within_goal(state, eps=5e-3) else 0
+            achieved_goal += 1 if env.within_goal(state, 1e-2) else 0
             total_goal += 1
         elif fetch_reach:
-            achieved_goal += 1 if np.sum((state["achieved_goal"] - state["desired_goal"]) ** 2) < 1e-3 else 0
+            achieved_goal += 1 if np.sum((state["achieved_goal"] - state["desired_goal"]) ** 2) < 1e-2 else 0
             total_goal += 1
         state, done = env.reset(), False
 

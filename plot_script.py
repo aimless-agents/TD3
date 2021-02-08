@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from datetime import datetime
 from parser import *
-from utils import epsilon_calc
 from glob import glob
 import matplotlib as mpl
 from pathlib import Path
@@ -52,11 +51,11 @@ if args.custom_env:
     # plot original reward curve
     plt.fill_between(x, results[:, 2] - results[:, 3], results[:, 2] + results[:, 3], color=colors[0]+"88")
     plt.plot(x, results[:, 2], color=colors[0])
-    plt.plot(x, [18] * len(x), color=colors[1])
+    plt.plot(x, [0] * len(x), color=colors[1])
     plt.xlabel("Timesteps")
     plt.ylabel("Original Returns")
-    if not args.no_title:
-        plt.title(f"Original Rewards")
+    # if not args.no_title:
+    #     plt.title(f"Original Rewards")
     plt.savefig(f"{outfile_stem}_original_rewards.png", bbox_inches='tight')
     print("Output to:", f"{outfile_stem}_original_rewards.png")
     # plt.show()
@@ -65,12 +64,12 @@ if args.custom_env:
 plt.fill_between(x, results[:, 0] - results[:, 1], results[:, 0] + results[:, 1], color=colors[0]+"88")
 plt.plot(x, results[:, 0], color=colors[0])
 
-if "FetchReach" in args.env:
+if "FetchReach" in args.env or args.custom_env:
     plt.plot(x, [0] * len(x), color=colors[1])
     
 plt.xlabel("Timesteps")
 plt.ylabel("Returns")
-if not args.no_title:
-    plt.title(f"Rewards")
+# if not args.no_title:
+#     plt.title(f"Rewards")
 plt.savefig(f"{outfile_stem}.png", bbox_inches='tight')
 print("Output to:", f"{outfile_stem}.png")

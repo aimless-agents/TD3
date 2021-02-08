@@ -53,28 +53,6 @@ class ReplayBuffer(object):
                 x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])	        #         x = np.concatenate([np.array(state["observation"]) if fetch_reach else np.array(state), goal])
                 next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])	        #         next_x = np.concatenate([np.array(next_state["observation"]) if fetch_reach else np.array(next_state), goal])
             self.add(x, action, next_x, gc_reward, done_bool)
-        # for _ in range(k): # factor to increase buffer by
-        #     for i in range(len(trajectory)):
-        #         old_state, old_action, old_next_state, reward, old_done_bool = trajectory[i]
-        #         if i < len(trajectory) - 1:
-        #             idx = np.random.choice(np.arange(i+1, len(trajectory)))
-        #             ng, _, _, _, _ = trajectory[idx]
-        #             if fetch_reach:
-        #                 new_goal = ng["desired_goal"]
-        #                 x = np.concatenate([np.array(old_state["observation"]), new_goal])
-        #                 next_x = np.concatenate([np.array(old_next_state["observation"]), new_goal])
-        #                 gc_reward = env.compute_reward(old_next_state["achieved_goal"], new_goal, {})
-        #             else:
-        #                 new_goal = np.array([ng[0] + ng[2], ng[1] + ng[3]])
-        #                 x = np.concatenate([old_state, new_goal])
-        #                 next_x = np.concatenate([old_next_state, new_goal])
-        #                 gc_reward = env.goal_cond_reward(old_action, old_next_state, new_goal)
-                    
-        #                 self.add(x, old_action, next_x, gc_reward, old_done_bool)
-
-        #         x = np.concatenate([np.array(old_state["observation"]) if fetch_reach else np.array(old_state), goal])
-        #         next_x = np.concatenate([np.array(old_next_state["observation"]) if fetch_reach else np.array(old_next_state), goal])
-        #         self.add(x, old_action, next_x, reward, old_done_bool)
 
     # refactored
     def updated_hindsight_experience(self, state, action, next_state, future_state, env, fetch_reach): 
@@ -189,24 +167,6 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         beta_weights = np.power(weights, self.beta)
         return beta_weights / np.max(beta_weights)
 
-# Calculate the epsilon range given upper+lower bounds, maximum timesteps, decay type.
-# Possible decay types:
-    # - linear
-    # - exponential
-# Assumes that the env is custom reacher environment, 
-#   where episodes are always 150 timesteps (I think??)
-def epsilon_calc(eps_upper, eps_lower, max_timesteps, 
-                    decay='linear'):
-    num_episodes = int(np.ceil(max_timesteps / 150))     # 150 for custom reacher specifically
-    x = np.arange(num_episodes)
-    if eps_upper == eps_lower:
-        return np.full(num_episodes, eps_upper)
-    if decay == 'linear':
-        epsilon_step = (eps_upper - eps_lower) / num_episodes
-        return np.arange(eps_upper, eps_lower, -epsilon_step)
-    if decay == 'exp':
-        return eps_upper * (1 - eps_lower) ** x
-
 def get_train_configuration(args):
     from ray import tune
     config = {}
@@ -259,7 +219,28 @@ class GeneralUtils():
                 env.set_goal(goal)
                 x = np.concatenate([np.array(state), goal])
         elif self.fetch_reach:
+            goal = state["desired_goal"]
             x = np.array(state["observation"])
+        elif self.args.custom_env:
+            goal = env.sample_goal_state(sigma=sigma)
+            x = np.array(state)
         else:
             x = np.array(state)
         return x, goal
+
+    # Calculate the epsilon range given upper+lower bounds, maximum timesteps, decay type.
+    # Possible decay types:
+        # - linear
+        # - exponential
+    # Assumes that the env is custom reacher environment, 
+    #   where episodes are always 150 timesteps (I think??)
+    def epsilon_calc(self, eps_upper, eps_lower, max_episode_steps):
+        num_episodes = int(np.ceil(self.args.max_timesteps / max_episode_steps))     # 150 for custom reacher specifically
+        x = np.arange(num_episodes)
+        if eps_upper == eps_lower:
+            return np.full(num_episodes, eps_upper)
+        if self.args.decay_type == 'linear':
+            epsilon_step = (eps_upper - eps_lower) / num_episodes
+            return np.arange(eps_upper, eps_lower, -epsilon_step)
+        if self.args.decay_type  == 'exp':
+            return eps_upper * (1 - eps_lower) ** x

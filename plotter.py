@@ -2,7 +2,6 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import epsilon_calc
 from glob import glob
 from pathlib import Path
 
