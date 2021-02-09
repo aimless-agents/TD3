@@ -26,6 +26,7 @@ def parse_our_args():
     parser.add_argument("--smoke_test", default=False, action='store_true')             # Include this flag to run a smoke test
     
     parser.add_argument("--custom_env", default=False, action="store_true")             # our custom environment name
+    parser.add_argument("--fetch_reach_dense", default=False, action="store_true")      # only set if fetch-reach and you would like to run with dense baseline
     parser.add_argument("--tune_run", default=False, action='store_true')               # Include this flag when trying to tune
     parser.add_argument("--run_type", default="local", help="local or cluster")         # either local or cluster
 

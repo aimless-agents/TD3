@@ -65,7 +65,7 @@ plt.fill_between(x, results[:, 0] - results[:, 1], results[:, 0] + results[:, 1]
 plt.plot(x, results[:, 0], color=colors[0])
 
 if "FetchReach" in args.env or args.custom_env:
-    plt.plot(x, [0] * len(x), color=colors[1])
+    plt.plot(x, [-3.75] * len(x), color=colors[1])
     
 plt.xlabel("Timesteps")
 plt.ylabel("Returns")

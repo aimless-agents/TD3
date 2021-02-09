@@ -27,6 +27,8 @@ def eval_policy(policy, env_name, seed, eval_episodes=10,
         eval_env = gym.make('OurReacher-v0')
     else:
         eval_env = gym.make(env_name)
+    if utils_object.fetch_reach and utils_object.args.fetch_reach_dense:
+        eval_env.env.reward_type = "dense"
     eval_env.seed(int(seed) + 100)
 
     rewards = np.zeros(eval_episodes)
@@ -104,6 +106,9 @@ def train(config, args):
         env = gym.make('OurReacher-v0', epsilon=epsilons[0], render=False)
     else:
         env = gym.make(args.env)
+
+    if utils_object.fetch_reach and utils_object.args.fetch_reach_dense:
+        env.env.reward_type = "dense"
 
     # Set seeds
     env.seed(int(args.seed))

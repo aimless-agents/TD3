@@ -29,6 +29,7 @@ if unknown:
     print("WARNING: unknown arguments:", unknown)
 eps_bounds = args.reacher_epsilon_bounds
 fetch_reach = "FetchReach" in args.env
+
 if args.policy:
     file_name = args.policy
 else:
@@ -111,18 +112,23 @@ for _ in range(1000):
     action = select_action(policy, state)
     state, reward, done, _ = env.step(action)
 
+    reacher_epsilon = 7e-2
+
     if done:
         if args.custom_env:
-            achieved_goal += 1 if env.within_goal(state, 1e-2) else 0
+            achieved_goal += 1 if env.within_goal(state, reacher_epsilon) else 0
             total_goal += 1
         elif fetch_reach:
-            achieved_goal += 1 if np.sum((state["achieved_goal"] - state["desired_goal"]) ** 2) < 1e-2 else 0
+            achieved_goal += 1 if np.linalg.norm(state["achieved_goal"] - state["desired_goal"], axis=-1) < 5e-2 else 0
+            total_goal += 1
+        elif "Reach" in args.env:
+            achieved_goal += 1 if np.linalg.norm(env.get_body_com("fingertip") - env.get_body_com("target")) < reacher_epsilon else 0
             total_goal += 1
         state, done = env.reset(), False
 
 print(f"\nCopy paste this command into terminal to create the output mp4: ./concat_vids.sh \"{file_name}\"")
 
-if args.custom_env or fetch_reach:
+if args.custom_env or fetch_reach or "Reach" in args.env:
     print(f"\n Percent within goal: {float(achieved_goal) / float(total_goal)}")
 
 env.close()
