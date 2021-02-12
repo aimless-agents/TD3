@@ -1,41 +1,40 @@
 # Exploration of Hindsight Experience Replay with TD3
 
+### [Read our blog post!](https://aimless-agents.github.io/articles/2021-02/HER)
 
+In this project we set out to reproduce results from Andrychowicz et al.'s [Hindsight Experience Replay paper](https://arxiv.org/abs/1707.01495), using Fujimoto et al.'s original [TD3 implementation](https://github.com/sfujim/TD3) as a baseline. Original TD3 paper linked [here](https://arxiv.org/abs/1802.09477).
 
-PyTorch implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3). If you use our code or data please cite the [paper](https://arxiv.org/abs/1802.09477).
-
-Method is tested on [MuJoCo](http://www.mujoco.org/) continuous control tasks in [OpenAI gym](https://github.com/openai/gym). 
-Networks are trained using [PyTorch 1.2](https://github.com/pytorch/pytorch) and Python 3.7. 
+We tested our implementation on OpenAI's [FetchReach](https://gym.openai.com/envs/FetchReach-v0/) environment, and variations of MuJoCo's [Reacher](https://gym.openai.com/envs/Reacher-v2/) environment. 
 
 ### Usage
-To train a model, run the following:
+
+#### Training
+To train a model on a certain environment, run:
 ```
-./experiments.sh
+python main.py --env <gym environment name> 
 ```
-Experiments on single environments can be run by calling:
+To save the model during training, also include the `--save_model` flag. Additional flags are detailed in `parser.py`.
+
+#### Plotting
+ 
+To plot the agent's learning curve, run:
 ```
-python main.py --env HalfCheetah-v2
+python plot_script.py <same args used to run main.py>
 ```
 
-Hyper-parameters can be modified with different arguments to main.py. We include an implementation of DDPG (DDPG.py), which is not used in the paper, for easy comparison of hyper-parameters with TD3. This is not the implementation of "Our DDPG" as used in the paper (see OurDDPG.py). 
+#### Visualizing
 
-Algorithms which TD3 compares against (PPO, TRPO, ACKTR, DDPG) can be found at [OpenAI baselines repository](https://github.com/openai/baselines). 
+To visualize the agent in action, run:
+```
+python record_policy_video.py <same args used to run main.py>
+```
+or
+```
+python record_policy_video.py --f <name of saved actor file>
+```
+This requires the model to have been saved.
 
 ### Results
-Code is no longer exactly representative of the code used in the paper. Minor adjustments to hyperparamters, etc, to improve performance. Learning curves are still the original results found in the paper.
 
-Learning curves found in the paper are found under /learning_curves. Each learning curve are formatted as NumPy arrays of 201 evaluations (201,), where each evaluation corresponds to the average total reward from running the policy for 10 episodes with no exploration. The first evaluation is the randomly initialized policy network (unused in the paper). Evaluations are peformed every 5000 time steps, over a total of 1 million time steps. 
+Results and analyses can be found in [our blog post](https://aimless-agents.github.io/articles/2021-02/HER).
 
-Numerical results can be found in the paper, or from the learning curves. Video of the learned agent can be found [here](https://youtu.be/x33Vw-6vzso). 
-
-### Bibtex
-
-```
-@inproceedings{fujimoto2018addressing,
-  title={Addressing Function Approximation Error in Actor-Critic Methods},
-  author={Fujimoto, Scott and Hoof, Herke and Meger, David},
-  booktitle={International Conference on Machine Learning},
-  pages={1582--1591},
-  year={2018}
-}
-```
