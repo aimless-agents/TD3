@@ -1,4 +1,6 @@
-# Addressing Function Approximation Error in Actor-Critic Methods
+# Exploration of Hindsight Experience Replay with TD3
+
+
 
 PyTorch implementation of Twin Delayed Deep Deterministic Policy Gradients (TD3). If you use our code or data please cite the [paper](https://arxiv.org/abs/1802.09477).
 
@@ -6,7 +8,7 @@ Method is tested on [MuJoCo](http://www.mujoco.org/) continuous control tasks in
 Networks are trained using [PyTorch 1.2](https://github.com/pytorch/pytorch) and Python 3.7. 
 
 ### Usage
-The paper results can be reproduced by running:
+To train a model, run the following:
 ```
 ./experiments.sh
 ```
