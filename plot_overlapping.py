@@ -1,3 +1,6 @@
+# Plots multiple sets of results in the same graph, for comparisons.
+# Use the --f flag, followed by the names of the result files.
+
 import sys
 import os
 import numpy as np

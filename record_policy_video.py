@@ -1,3 +1,5 @@
+# Runs an actor policy file in its environment, and records video.
+
 import os
 import sys
 import numpy as np

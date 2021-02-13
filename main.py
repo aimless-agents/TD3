@@ -1,3 +1,5 @@
+# Primary training (and evaluation) runner.
+
 import numpy as np
 import torch
 import gym

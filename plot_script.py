@@ -1,3 +1,7 @@
+# Plots saved .npy results file.
+# Use the same flags you used to run main.py 
+#   to plot that run's results.
+
 import sys
 import os
 import numpy as np

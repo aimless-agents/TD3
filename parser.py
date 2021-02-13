@@ -1,3 +1,6 @@
+# Utility for parsing all the relevant command-line args
+#   for our training and experiments.
+
 import argparse
 
 def parse_our_args():

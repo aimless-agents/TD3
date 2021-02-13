@@ -15,7 +15,7 @@ gym.envs.register(
                             max_episode_steps=150,
                             reward_threshold=100.0,
                             )
-# import pdb; pdb.set_trace()
+
 epsilon = 5e-2
 env = gym.make('OurReacher-v0', epsilon=epsilon, render=True)
 env = gym.make("FetchReach-v1")
